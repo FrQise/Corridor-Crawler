@@ -3,12 +3,14 @@ from enum import Enum
 import inquirer
 from item_definitions import Weapon, Armor, weapons, armor
 from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
+import importlib
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
     TREASURE_CHEST = "Treasure Chest"
     TRAP = "Trap"
     EMPTY_CORRIDOR = "Empty Corridor"
+    GOD_ALTAR = "God Altar"
 
 class CorridorEvent:
     def __init__(self, description):
@@ -34,8 +36,10 @@ class CorridorDungeon:
             print(f"Corridor Position {i+1}: {event.description}")
 
 class Player:
-    def __init__(self, race=None, char_class=None, starting_gear = None):
-        self.stats = {
+    def __init__(self, race=None, char_class=None, starting_gear=None):
+        self.race = race
+        self.char_class = char_class
+        self.stats = {  # Initialize stats attribute
             "Strength": 10,
             "Dexterity": 10,
             "Constitution": 10,
@@ -43,15 +47,17 @@ class Player:
             "Wisdom": 10,
             "Charisma": 10
         }
-        self.race = race
-        self.char_class = char_class
-        self.equipment = Equipment()  # Initialize equipment
-        self.inventory = []  # Initialize inventory
+        self.equipment = Equipment()
+        self.inventory = []
         self.apply_race_modifiers()
         if char_class:
-            char_class.apply_class_modifiers(self.stats)  # Apply class modifiers
+            char_class.apply_class_modifiers(self.stats)
         if starting_gear:
             self.equip_starting_gear(starting_gear)
+        
+        # Calculate HP after initializing stats
+        self.stats["HP"] = self.calculate_hp()
+        self.stats["MP"] = self.calculate_mp()
 
     def equip_starting_gear(self, starting_gear):
         for slot, item_name in starting_gear.items():
@@ -312,6 +318,91 @@ def open_treasure_chest(player):
                 player.inventory.append(armor_piece)
         print("\nThe Longsword and Chain Shirt have been added to your inventory.")
 
+def god_altar(player):
+    print("\nYou just found a God Altar")
+    questions = [inquirer.Confirm("worship_god", message="Do you wish to worship God_Placerholder ?", default=True)]
+    answer = inquirer.prompt(questions)["worship_god"]
+    if answer:
+        print("\nYou decided to worship God_Placeholder")
+        print("\nHere are your modifiers: ADD_MODIFIERS")
+    else: print("You decided to not worship God_Placeholder, they might take offense of this.")
+    wait_for_input()
+
+def calculate_encounter_difficulty(current_position):
+    # Calculate difficulty based on the current position
+    # For example, you might want the difficulty to increase as the player progresses deeper into the dungeon
+    # You can define your own formula here based on your game design
+    return min(current_position // 2 + 1, 5)  # Example formula, capped at difficulty level 5
+
+def handle_enemy_encounter(player, current_position):
+    # Calculate encounter difficulty
+    encounter_difficulty = calculate_encounter_difficulty(current_position)
+
+    # Dynamically import the bestiary module
+    bestiary = importlib.import_module('bestiary')
+
+    # Filter enemies based on difficulty level
+    possible_enemies = [enemy for enemy in [bestiary.goblin, bestiary.orc, bestiary.dragon] if enemy.difficulty <= encounter_difficulty]
+
+    # Choose a random enemy from the list of possible enemies
+    enemy = random.choice(possible_enemies)
+
+    # Display initial enemy encounter
+    print(f"\nYou encounter a {enemy.name}")  # Print HP in red color
+    print("Prepare for battle!")
+
+    # Combat loop
+    while True:
+        # Display player's HP and MP in color
+        print(f"\033[91mPlayer HP: {player.stats['HP']}\033[0m")  # Print HP in red color
+        print(f"\033[94mPlayer MP: {player.stats['MP']}\033[0m")  # Print MP in blue color
+
+        # Display enemy HP before presenting battle options
+        print(f"{enemy.name} HP: {enemy.stats['HP']}")
+
+        # Display combat options
+        combat_options = [
+            inquirer.List("action",
+                          message="Choose your action:",
+                          choices=["Attack", "Magic", "Use Items"])
+        ]
+        action = inquirer.prompt(combat_options)["action"]
+
+        if action == "Attack":
+            # Implement attack logic
+            print("You attacked the enemy!")
+        elif action == "Magic":
+            # Implement magic usage logic
+            print("You cast a spell!")
+        elif action == "Use Items":
+            # Implement item usage logic
+            print("You used an item!")
+
+        # Implement enemy's turn
+        enemy_action(player, enemy)
+
+        # Check if the battle is over
+        if player.stats['HP'] <= 0:
+            print("You have been defeated!")
+            break
+        elif enemy.stats['HP'] <= 0:
+            print(f"{enemy.name} has been defeated!")
+            break
+
+    wait_for_input()  # Wait for player input before continuing
+
+import random
+
+def enemy_action(player, enemy):
+    if hasattr(enemy, 'stats') and 'Damage' in enemy.stats:
+        damage_stat = enemy.stats['Damage']
+        damage_modifier = random.uniform(0.8, 1.2)  # Random modifier between 80% to 120%
+        damage_dealt = int(damage_stat * damage_modifier)  # Calculate the damage dealt
+        player.stats['HP'] -= damage_dealt
+        print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
+    else:
+        print(f"{enemy.name} attacks! Unable to determine the outcome of the attack.")
+
 class GameState:
     def __init__(self, menu_function):
         self.menu_function = menu_function
@@ -353,6 +444,10 @@ class Game:
             if current_event.description == CorridorEventType.TREASURE_CHEST.value and self.current_position not in self.opened_treasure_chests:
                 open_treasure_chest(self.player)
                 self.opened_treasure_chests.append(self.current_position)
+            elif current_event.description == CorridorEventType.GOD_ALTAR.value:
+                god_altar(self.player)
+            elif current_event.description == CorridorEventType.ENEMY_ENCOUNTER.value:
+                handle_enemy_encounter(self.player, self.current_position)
 
             # Player options
             questions = [
