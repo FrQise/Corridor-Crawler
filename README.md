@@ -20,7 +20,6 @@
 - **Corridor Structure and Biomes:** Determine the length and structure of corridors, including the number of rooms and potential biome changes.
 - **Enhanced Enemy AI:** Improve enemy AI to create more dynamic and challenging combat encounters.
 - **Game World Expansion:** Explore opportunities for expanding the game world with new corridors, biomes, and storylines.
-- **Player Feedback Integration:** Gather feedback from players to iterate on gameplay mechanics and enhance the overall gaming experience.
 
 ### Feedback and Contribution
 
