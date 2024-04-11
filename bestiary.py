@@ -10,6 +10,8 @@ class Monster:
 goblin_stats = {
     "HP": 50,  # Define HP attribute for Goblin
     "Damage" : 20, #Define damage attribute for Goblin
+    "Defense" : 10, #Define Defense stat vs attack stat
+    "Magic Defense" : 0, #Define magic defense vs spells
     "Strength": 8,
     "Dexterity": 12,
     "Constitution": 10,
@@ -23,6 +25,9 @@ goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficu
 
 orc_stats = {
     "HP": 100,  # Define HP attribute for Orc
+    "Damage" : 35, #Define damage attribute
+    "Defense" : 15, #Define Defense vs attack stat
+    "Magic Defense" : 0, #Mdef vs Matk
     "Strength": 15,
     "Dexterity": 10,
     "Constitution": 14,

@@ -4,6 +4,7 @@ import inquirer
 from item_definitions import Weapon, Armor, weapons, armor
 from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
 import importlib
+import sys
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -83,10 +84,10 @@ class Player:
             self.stats['Charisma'] += self.race.charisma
 
     def calculate_hp(self):
-        return self.stats["Constitution"] * 10 + self.stats["Strength"] * 5
+        return round(self.stats["Constitution"] * 2 + self.stats["Strength"] * 0.5)
 
     def calculate_mp(self):
-        return self.stats["Intelligence"] * 10 + self.stats["Wisdom"] * 5
+        return round(self.stats["Intelligence"] * 2 + self.stats["Wisdom"] * 0.5)
 
     def get_current_weapon(self):
         if self.equipment:
@@ -132,8 +133,8 @@ def move_forward(position):
 
 def check_room(player):
     print("\nPlayer:")
-    print(f"\033[91mHP: {player.calculate_hp()}\033[0m")  # Red color for HP
-    print(f"\033[94mMP: {player.calculate_mp()}\033[0m")  # Blue color for MP
+    print(f"\033[91mHP: {player.stats['HP']}\033[0m")  # Red color for HP
+    print(f"\033[94mMP: {player.stats['MP']}\033[0m")  # Blue color for MP
     print(f"Race: {player.race.name} | Class: {player.char_class.name}")
     print(f"Holding: {player.get_current_weapon().name if player.get_current_weapon() else 'None'}")
 
@@ -293,7 +294,9 @@ def use_item(player):
     pass
 
 def wait_for_input():
-    input("\nPress any key to continue...")
+    input("\nPress Enter to continue...")
+    # Move the cursor to the beginning of the line and clear it
+    sys.stdout.write("\033[F\033[K")
 
 def save_game():
     print("\nSaving game...\n")
@@ -328,6 +331,19 @@ def god_altar(player):
     else: print("You decided to not worship God_Placeholder, they might take offense of this.")
     wait_for_input()
 
+def game_over():
+    print("GAME OVER")
+    input("Press any key to quit the game...")
+    exit()
+
+def check_player_hp(player):
+    if player.stats['HP'] <= 0:
+        game_over()
+
+def handle_hp_reduction(player, hp_reduction_amount):
+    player.stats['HP'] -= hp_reduction_amount
+    check_player_hp(player)
+
 def calculate_encounter_difficulty(current_position):
     # Calculate difficulty based on the current position
     # For example, you might want the difficulty to increase as the player progresses deeper into the dungeon
@@ -348,50 +364,108 @@ def handle_enemy_encounter(player, current_position):
     enemy = random.choice(possible_enemies)
 
     # Display initial enemy encounter
-    print(f"\nYou encounter a {enemy.name}")  # Print HP in red color
+    print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
     print("Prepare for battle!")
 
     # Combat loop
     while True:
-        # Display player's HP and MP in color
-        print(f"\033[91mPlayer HP: {player.stats['HP']}\033[0m")  # Print HP in red color
-        print(f"\033[94mPlayer MP: {player.stats['MP']}\033[0m")  # Print MP in blue color
-
-        # Display enemy HP before presenting battle options
-        print(f"{enemy.name} HP: {enemy.stats['HP']}")
-
-        # Display combat options
-        combat_options = [
-            inquirer.List("action",
-                          message="Choose your action:",
-                          choices=["Attack", "Magic", "Use Items"])
-        ]
-        action = inquirer.prompt(combat_options)["action"]
-
-        if action == "Attack":
-            # Implement attack logic
-            print("You attacked the enemy!")
-        elif action == "Magic":
-            # Implement magic usage logic
-            print("You cast a spell!")
-        elif action == "Use Items":
-            # Implement item usage logic
-            print("You used an item!")
-
-        # Implement enemy's turn
-        enemy_action(player, enemy)
-
-        # Check if the battle is over
+        # Check if the player is defeated
         if player.stats['HP'] <= 0:
             print("You have been defeated!")
-            break
-        elif enemy.stats['HP'] <= 0:
-            print(f"{enemy.name} has been defeated!")
-            break
+            check_player_hp(player)
+            return  # Exit the combat loop if the player is defeated
+
+        # Display player's HP and MP in color
+        print(f"\n\033[91mPlayer HP: {player.stats['HP']}\033[0m")  # Print HP in red color
+        print(f"\033[94mPlayer MP: {player.stats['MP']}\033[0m\n")  # Print MP in blue color
+
+        # Display enemy HP before presenting battle options if enemy is alive
+        if enemy.stats['HP'] > 0:
+            print(f"{enemy.name} HP: {enemy.stats['HP']}\n")
+
+        # Display combat options only if player's HP is above 0
+        if player.stats['HP'] > 0:
+            # Combat options
+            combat_options = [
+                inquirer.List("action",
+                              message="Choose your action:",
+                              choices=["Attack", "Spells", "Use Items", "Block"])
+            ]
+            action = inquirer.prompt(combat_options)["action"]
+
+            if action == "Attack":
+                # Implement attack logic
+                attack(player, enemy)
+            elif action == "Spells":
+                # Implement magic usage logic
+                use_spells(player, enemy)
+            elif action == "Use Items":
+                # Implement item usage logic
+                use_items(player)
+            elif action == "Block":
+                # Implement blocking logic
+                block(player, enemy)
+
+        # Check if the enemy is defeated
+        if enemy.stats['HP'] <= 0:
+            print(f"\n{enemy.name} has been defeated!")
+            break  # Exit the combat loop if the enemy is defeated
+
+        # Check if the player is defeated after taking action
+        if player.stats['HP'] <= 0:
+            print("You have been defeated!")
+            return  # Exit the combat loop if the player is defeated
+
+        # Implement enemy's turn only if it's alive
+        if enemy.stats['HP'] > 0:
+            enemy_action(player, enemy)
 
     wait_for_input()  # Wait for player input before continuing
 
-import random
+def attack(player, enemy):
+    # Get the equipped weapon of the player
+    equipped_weapon = player.get_current_weapon()
+    
+    if equipped_weapon:
+        # Calculate player's attack power based on strength and weapon's attack
+        attack_power = player.stats['Strength'] + equipped_weapon.stats.get('Attack', 0)
+        
+        # Calculate damage dealt by subtracting enemy's defense from player's attack power
+        damage = max(0, attack_power - enemy.stats.get('Defense', 0))
+        
+        # Reduce enemy's HP by damage
+        enemy.stats['HP'] -= damage
+        
+        print(f"You attacked the {enemy.name} with {equipped_weapon.name} and dealt {damage} damage!\n")
+
+    else:
+        print("You have no weapon equipped!")
+    
+    # Check if the enemy is still alive before allowing it to attack
+    if enemy.stats.get('HP', 0) > 0:
+        if 'Attack' in enemy.stats:
+            print(f"{enemy.name} attacks and deals {enemy.stats['Attack']} damage!")
+            player.stats['HP'] -= enemy.stats['Attack']
+            if player.stats['HP'] <= 0:
+                print("You have been defeated!")
+                # Add any other game over logic here
+
+def use_spells(player, enemy):
+    # Implement spell usage logic here
+    pass
+
+def use_items(player):
+    # Implement item usage logic here
+    pass
+
+def block(player, enemy):
+    # Calculate damage reduction based on player's defense stats
+    damage_reduction = player.stats.get('Defense', 0)
+    # Reduce the enemy's damage by the player's defense
+    enemy_damage = max(0, enemy.stats.get('Damage', 0) - damage_reduction)
+    # Reduce player's HP by the enemy's damage
+    player.stats['HP'] -= enemy_damage
+    print(f"You blocked the {enemy.name}'s attack and received {enemy_damage} damage!")
 
 def enemy_action(player, enemy):
     if hasattr(enemy, 'stats') and 'Damage' in enemy.stats:
@@ -400,6 +474,7 @@ def enemy_action(player, enemy):
         damage_dealt = int(damage_stat * damage_modifier)  # Calculate the damage dealt
         player.stats['HP'] -= damage_dealt
         print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
+        wait_for_input()
     else:
         print(f"{enemy.name} attacks! Unable to determine the outcome of the attack.")
 
