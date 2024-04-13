@@ -40,13 +40,22 @@ class Player:
     def __init__(self, race=None, char_class=None, starting_gear=None):
         self.race = race
         self.char_class = char_class
-        self.stats = {  # Initialize stats attribute
+        self.stats = {  
             "Strength": 10,
             "Dexterity": 10,
             "Constitution": 10,
             "Intelligence": 10,
             "Wisdom": 10,
-            "Charisma": 10
+            "Charisma": 10,
+            "HP": 0,  # Placeholder for HP calculation
+            "MP": 0,  # Placeholder for MP calculation
+            "Fire Resistance": 0,  # New elemental resistance stats
+            "Ice Resistance": 0,
+            "Earth Resistance": 0,
+            "Water Resistance": 0,
+            "Electricity Resistance": 0,
+            "Poison Resistance": 0,
+            "Darkness Resistance": 0
         }
         self.equipment = Equipment()
         self.inventory = []
@@ -55,7 +64,7 @@ class Player:
             char_class.apply_class_modifiers(self.stats)
         if starting_gear:
             self.equip_starting_gear(starting_gear)
-        
+
         # Calculate HP after initializing stats
         self.stats["HP"] = self.calculate_hp()
         self.stats["MP"] = self.calculate_mp()
@@ -82,6 +91,22 @@ class Player:
             self.stats['Intelligence'] += self.race.intelligence
             self.stats['Wisdom'] += self.race.wisdom
             self.stats['Charisma'] += self.race.charisma
+
+            # Apply elemental resistance modifiers based on race if they exist
+            if hasattr(self.race, 'fire_resistance'):
+                self.stats['Fire Resistance'] += self.race.fire_resistance
+            if hasattr(self.race, 'ice_resistance'):
+                self.stats['Ice Resistance'] += self.race.ice_resistance
+            if hasattr(self.race, 'earth_resistance'):
+                self.stats['Earth Resistance'] += self.race.earth_resistance
+            if hasattr(self.race, 'water_resistance'):
+                self.stats['Water Resistance'] += self.race.water_resistance
+            if hasattr(self.race, 'electricity_resistance'):
+                self.stats['Electricity Resistance'] += self.race.electricity_resistance
+            if hasattr(self.race, 'poison_resistance'):
+                self.stats['Poison Resistance'] += self.race.poison_resistance
+            if hasattr(self.race, 'darkness_resistance'):
+                self.stats['Darkness Resistance'] += self.race.darkness_resistance
 
     def calculate_hp(self):
         return round(self.stats["Constitution"] * 2 + self.stats["Strength"] * 0.5)
@@ -139,15 +164,35 @@ def check_room(player):
     print(f"Holding: {player.get_current_weapon().name if player.get_current_weapon() else 'None'}")
 
 def check_stats(player):
-    print("\nPlayer Stats:")
-    for stat, value in player.stats.items():
-        print(f"{stat}: {value}")
+    print("\n\033[1m\033[4mPlayer Stats:\033[0m")
+    
+    # Calculate maximum width for stats and resistances
+    stats_width = max(len(stat.split(":")[0]) for stat in player.stats.keys() if not stat.endswith("Resistance"))
+    resistance_width = max(len(stat.split(":")[0]) for stat in player.stats.keys() if stat.endswith("Resistance"))
 
-    print("\nProficiencies:")
+    # Collect stats and resistances into separate lists
+    stats_column = []
+    resistances_column = []
+
+    for stat, value in player.stats.items():
+        if not stat.endswith("Resistance"):
+            stats_column.append(f"{stat}: {value}")  # Collect stats
+        else:
+            resistances_column.append(f"{stat}: {value}")  # Collect resistances
+
+    # Print stats and resistances side by side
+    for i in range(len(stats_column)):
+        stat = stats_column[i]
+        resistance = resistances_column[i] if i < len(resistances_column) else ''  # Handle the case when resistances_column is shorter
+        print(f"{stat:<{stats_width}}\t{' '*(32 - resistance_width)}{resistance}")
+
+    # Print proficiencies
+    print("\n\033[1m\033[4mProficiencies:\033[0m")
     print(f"Weapon Proficiencies: {', '.join(player.char_class.weapon_proficiencies)}")
     print(f"Armor Proficiencies: {', '.join(player.char_class.armor_proficiencies)}")
 
     wait_for_input()
+
 
 def check_equipment(player):
     print("\nPlayer Equipment:")
@@ -472,11 +517,27 @@ def enemy_action(player, enemy):
         damage_stat = enemy.stats['Damage']
         damage_modifier = random.uniform(0.8, 1.2)  # Random modifier between 80% to 120%
         damage_dealt = int(damage_stat * damage_modifier)  # Calculate the damage dealt
+        
+        # Check if the enemy's attack is elemental
+        if 'Element' in enemy.stats:
+            element = enemy.stats['Element']
+            # Check if the player has resistance to the elemental attack
+            if f"{element} Resistance" in player.stats:
+                resistance = player.stats[f"{element} Resistance"]
+                # Calculate the damage reduction based on elemental resistance
+                damage_reduction_percentage = resistance / 100
+                damage_dealt -= int(damage_dealt * damage_reduction_percentage)
+                print(f"{enemy.name} attacks with {element} and deals {damage_dealt} damage!")
+        else:
+            print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
+        
         player.stats['HP'] -= damage_dealt
-        print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
-        wait_for_input()
+        if player.stats['HP'] <= 0:
+            print("You have been defeated!")
+            # Add any other game over logic here
     else:
         print(f"{enemy.name} attacks! Unable to determine the outcome of the attack.")
+
 
 class GameState:
     def __init__(self, menu_function):

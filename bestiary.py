@@ -9,19 +9,21 @@ class Monster:
 # Define monsters and their attributes
 goblin_stats = {
     "HP": 50,  # Define HP attribute for Goblin
-    "Damage" : 20, #Define damage attribute for Goblin
-    "Defense" : 10, #Define Defense stat vs attack stat
-    "Magic Defense" : 0, #Define magic defense vs spells
+    "Damage": 20,  # Define damage attribute for Goblin
+    "Defense": 10,  # Define Defense stat vs attack stat
+    "Magic Defense": 0,  # Define magic defense vs spells
     "Strength": 8,
     "Dexterity": 12,
     "Constitution": 10,
     "Intelligence": 6,
     "Wisdom": 6,
-    "Charisma": 6
+    "Charisma": 6,
+    "Element": "Fire"  # Define elemental attribute of the goblin's attack
 }
 goblin_gear = ["Rusty Sword", "Tattered Cloth Armor"]
 goblin_loot_table = ["Gold", "Health Potion", "Small Gem"]
 goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1)
+
 
 orc_stats = {
     "HP": 100,  # Define HP attribute for Orc
@@ -33,7 +35,8 @@ orc_stats = {
     "Constitution": 14,
     "Intelligence": 8,
     "Wisdom": 8,
-    "Charisma": 8
+    "Charisma": 8,
+    "Element": "Fire"
 }
 orc_gear = ["Battle Axe", "Chainmail Armor"]
 orc_loot_table = ["Gold", "Health Potion", "Large Gem"]
