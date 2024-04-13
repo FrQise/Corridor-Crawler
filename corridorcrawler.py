@@ -5,6 +5,7 @@ from item_definitions import Weapon, Armor, weapons, armor
 from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
 import importlib
 import sys
+from itertools import zip_longest
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -166,8 +167,11 @@ def check_room(player):
 def check_stats(player):
     print("\n\033[1m\033[4mPlayer Stats:\033[0m")
     
+    # Exclude HP and MP stats from printing
+    stats_to_exclude = ["HP", "MP"]
+
     # Calculate maximum width for stats and resistances
-    stats_width = max(len(stat.split(":")[0]) for stat in player.stats.keys() if not stat.endswith("Resistance"))
+    stats_width = max(len(stat.split(":")[0]) for stat in player.stats.keys() if not stat.endswith("Resistance") and stat not in stats_to_exclude)
     resistance_width = max(len(stat.split(":")[0]) for stat in player.stats.keys() if stat.endswith("Resistance"))
 
     # Collect stats and resistances into separate lists
@@ -175,16 +179,17 @@ def check_stats(player):
     resistances_column = []
 
     for stat, value in player.stats.items():
-        if not stat.endswith("Resistance"):
+        if not stat.endswith("Resistance") and stat not in stats_to_exclude:
             stats_column.append(f"{stat}: {value}")  # Collect stats
-        else:
+        elif stat.endswith("Resistance"):
             resistances_column.append(f"{stat}: {value}")  # Collect resistances
 
-    # Print stats and resistances side by side
-    for i in range(len(stats_column)):
-        stat = stats_column[i]
-        resistance = resistances_column[i] if i < len(resistances_column) else ''  # Handle the case when resistances_column is shorter
-        print(f"{stat:<{stats_width}}\t{' '*(32 - resistance_width)}{resistance}")
+    # Calculate the total width for the two columns
+    total_width = max(stats_width, resistance_width) + 1  # Add 1 for spacing
+
+    # Print stats and resistances side by side with proper alignment
+    for stat, resistance in zip_longest(stats_column, resistances_column, fillvalue=""):
+        print(f"{stat:<{total_width}}{resistance}")
 
     # Print proficiencies
     print("\n\033[1m\033[4mProficiencies:\033[0m")
@@ -192,6 +197,8 @@ def check_stats(player):
     print(f"Armor Proficiencies: {', '.join(player.char_class.armor_proficiencies)}")
 
     wait_for_input()
+
+
 
 
 def check_equipment(player):
