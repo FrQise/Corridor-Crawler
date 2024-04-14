@@ -1,10 +1,10 @@
 import random
 from enum import Enum
 import inquirer
-from item_definitions import Weapon, Armor, weapons, armor
-from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
 import importlib
 import sys
+from item_definitions import Weapon, Armor, weapons, armor
+from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
 from itertools import zip_longest
 from pantheon import gods
 
@@ -724,6 +724,45 @@ def select_starting_gear(selected_class):
     return starting_gear
 
 def main():
+    print("""                                                                                                                                                                                                                                          _____
+        _____         ____     ___________      ___________        ____________  ____________          ____     ___________                     _____  ___________          _____           _______     _______  _____               _____\    \ ___________       
+   _____\    \_   ____\_  \__  \          \     \          \      /            \ \           \     ____\_  \__  \          \               _____\    \_\          \       /      |_        /      /|   |\      \|\    \             /    / |    |\          \      
+  /     /|     | /     /     \  \    /\    \     \    /\    \    |\___/\  \\___/| \           \   /     /     \  \    /\    \             /     /|     |\    /\    \     /         \      /      / |   | \      \\\    \           /    /  /___/| \    /\    \     
+ /     / /____/|/     /\      |  |   \_\    |     |   \_\    |    \|____\  \___|/  |    /\     | /     /\      |  |   \_\    |           /     / /____/| |   \_\    |   |     /\    \    |      /  |___|  \      |\\    \         |    |__ |___|/  |   \_\    |    
+|     | |____|/|     |  |     |  |      ___/      |      ___/           |  |       |   |  |    ||     |  |     |  |      ___/           |     | |____|/  |      ___/    |    |  |    \   |      |  |   |  |      | \|    | ______ |       \        |      ___/     
+|     |  _____ |     |  |     |  |      \  ____   |      \  ____   __  /   / __    |    \/     ||     |  |     |  |      \  ____        |     |  _____   |      \  ____ |     \/      \  |       \ \   / /       |  |    |/      \|     __/ __     |      \  ____  
+|\     \|\    \|     | /     /| /     /\ \/    \ /     /\ \/    \ /  \/   /_/  |  /           /||     | /     /| /     /\ \/    \       |\     \|\    \ /     /\ \/    \|\      /\     \ |      |\\/   \//|      |  /            ||\    \  /  \   /     /\ \/    \ 
+| \_____\|    ||\     \_____/ |/_____/ |\______|/_____/ |\______||____________/| /___________/ ||\     \_____/ |/_____/ |\______|       | \_____\|    |/_____/ |\______|| \_____\ \_____\|\_____\|\_____/|/_____/| /_____/\_____/|| \____\/    | /_____/ |\______| 
+| |     /____/|| \_____\   | / |     | | |     ||     | | |     ||           | /|           | / | \_____\   | / |     | | |     |       | |     /____/||     | | |     || |     | |     || |     | |   | |     | ||      | |    ||| |    |____/| |     | | |     | 
+ \|_____|    || \ |    |___|/  |_____|/ \|_____||_____|/ \|_____||___________|/ |___________|/   \ |    |___|/  |_____|/ \|_____|        \|_____|    |||_____|/ \|_____| \|_____|\|_____| \|_____|\|___|/|_____|/ |______|/|____|/ \|____|   | | |_____|/ \|_____| 
+        |____|/  \|____|                                                                          \|____|                                       |____|/                                                                                  |___|/                    
+    """)
+    wait_for_input()
+    while True:
+        print("\nMain Menu:")
+        menu_choices = [
+            inquirer.List("choice",
+                          message="Select an option:",
+                          choices=[
+                              "Start a new game",
+                              "Load",
+                              "About",
+                              "Exit"
+                          ])
+        ]
+        choice = inquirer.prompt(menu_choices)["choice"]
+
+        if choice == "Start a new game":
+            start_new_game()
+        elif choice == "Load":
+            load_game()
+        elif choice == "About":
+            show_about()
+        elif choice == "Exit":
+            print("Exiting the game. Goodbye!")
+            break
+
+def start_new_game():
     selected_race, selected_class = select_character()
     starting_gear = select_starting_gear(selected_class)
 
@@ -732,6 +771,17 @@ def main():
     game = Game()
     game.player = player  # Assign the player object to the game
     game.main_menu()
+
+def load_game():
+    # Implement loading saved game logic here
+    print("Load function is under construction.")
+
+def show_about():
+    # Display information about the game
+    print("This is a text-based adventure game.")
+    print("Developed by FrQise.")
+    print("Version : Very pas finished")
+    wait_for_input()
 
 if __name__ == "__main__":
     main()
