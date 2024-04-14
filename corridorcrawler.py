@@ -6,6 +6,7 @@ from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue
 import importlib
 import sys
 from itertools import zip_longest
+from pantheon import gods
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -58,6 +59,7 @@ class Player:
             "Poison Resistance": 0,
             "Darkness Resistance": 0
         }
+        self.god = None
         self.equipment = Equipment()
         self.inventory = []
         self.apply_race_modifiers()
@@ -166,7 +168,7 @@ def check_room(player):
 
 def check_stats(player):
     print("\n\033[1m\033[4mPlayer Stats:\033[0m")
-    
+
     # Exclude HP and MP stats from printing
     stats_to_exclude = ["HP", "MP"]
 
@@ -191,15 +193,15 @@ def check_stats(player):
     for stat, resistance in zip_longest(stats_column, resistances_column, fillvalue=""):
         print(f"{stat:<{total_width}}{resistance}")
 
+    # Print god if it exists
+    if hasattr(player, 'god'):
+        print(f"\n\033[1m\033[4mGod:\033[0m {player.god}")
+
     # Print proficiencies
     print("\n\033[1m\033[4mProficiencies:\033[0m")
     print(f"Weapon Proficiencies: {', '.join(player.char_class.weapon_proficiencies)}")
     print(f"Armor Proficiencies: {', '.join(player.char_class.armor_proficiencies)}")
-
     wait_for_input()
-
-
-
 
 def check_equipment(player):
     print("\nPlayer Equipment:")
@@ -356,31 +358,69 @@ def save_game():
 def open_treasure_chest(player):
     print("\nYou just entered a treasure room!")
     questions = [
-        inquirer.Confirm("open_chest",
-                         message="Do you want to open the chest?",
-                         default=True)
+        inquirer.List("open_chest",
+                      message="Do you want to open the chest?",
+                      choices=["Yes", "No"],
+                      default="Yes")
     ]
     answer = inquirer.prompt(questions)["open_chest"]
-    if answer:
-        print("\nYou found a Longsword and a Chain Shirt and a Basic Shield!")
-        for weapon in weapons:
-            if weapon.name == "Longsword":
-                player.inventory.append(weapon)
-        for armor_piece in armor:
-            if armor_piece.name == "Chain Shirt":
-                player.inventory.append(armor_piece)
-            if armor_piece.name == "Basic Shield":
-                player.inventory.append(armor_piece)
-        print("\nThe Longsword and Chain Shirt have been added to your inventory.")
+    if answer == "Yes":
+        print("\nYou found a Longsword, a Chain Shirt, and a Basic Shield!")
+        for item in weapons + armor:
+            if item.name in ["Longsword", "Chain Shirt", "Basic Shield"]:
+                player.inventory.append(item)
+        print("\nThe Longsword, Chain Shirt, and Basic Shield have been added to your inventory.")
+        wait_for_input()
 
-def god_altar(player):
-    print("\nYou just found a God Altar")
-    questions = [inquirer.Confirm("worship_god", message="Do you wish to worship God_Placerholder ?", default=True)]
-    answer = inquirer.prompt(questions)["worship_god"]
-    if answer:
-        print("\nYou decided to worship God_Placeholder")
-        print("\nHere are your modifiers: ADD_MODIFIERS")
-    else: print("You decided to not worship God_Placeholder, they might take offense of this.")
+
+def god_altar(player, altar_description):
+    print("\n\nYou just found the Altar of", end=" ")
+
+    # Randomly select a god
+    selected_god = random.choice(gods)
+    print(selected_god.name)
+
+    print("\nDescription:", selected_god.description,"\n")
+
+    current_god = player.stats.get('God', None)
+    if current_god:
+        if current_god == selected_god.name:
+            print("This is the altar of your current god.")
+            wait_for_input()
+            return
+
+        print(f"\nYou are currently worshiping {current_god}.")
+        betray_question = [inquirer.List("betray_current_god", 
+                                         message="Do you want to betray your current god and worship a new one?", 
+                                         choices=["Yes", "No"], 
+                                         default="No")]
+        betray_answer = inquirer.prompt(betray_question)["betray_current_god"]
+        if betray_answer:
+            print(f"\nYou decided to betray {current_god}.")
+            player.stats.pop('God')
+        else:
+            print("\nYou decided to remain loyal to your current god.")
+            wait_for_input()
+            return
+    
+    # Ask the player if they want to worship the selected god
+    questions = [
+        inquirer.List("worship_confirm",
+                      message=f"Do you want to worship {selected_god.name}?",
+                      choices=["Yes", "No"],
+                      default="No")
+    ]
+    worship_confirm = inquirer.prompt(questions)["worship_confirm"]
+
+    if worship_confirm == "Yes":
+        print(f"\nYou decided to worship {selected_god.name}.")
+        # Apply buffs to the player based on the selected god
+        for stat, value in selected_god.buffs.items():
+            player.stats[stat] += value
+        player.stats['God'] = selected_god.name
+    else:
+        print("\nYou decided not to worship any god at this time.")
+
     wait_for_input()
 
 def game_over():
@@ -410,13 +450,13 @@ def handle_enemy_encounter(player, current_position):
     bestiary = importlib.import_module('bestiary')
 
     # Filter enemies based on difficulty level
-    possible_enemies = [enemy for enemy in [bestiary.goblin, bestiary.orc, bestiary.dragon, bestiary.edouard] if enemy.difficulty <= encounter_difficulty]
+    possible_enemies = [enemy for enemy in [bestiary.goblin, bestiary.orc, bestiary.dragon] if enemy.difficulty <= encounter_difficulty]
 
     # Choose a random enemy from the list of possible enemies
     enemy = random.choice(possible_enemies)
 
     # Display initial enemy encounter
-    print(f"\n\033[1;33mYou encounter {enemy.name}\033[0m")
+    print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
     print("Prepare for battle!")
 
     # Combat loop
@@ -441,7 +481,7 @@ def handle_enemy_encounter(player, current_position):
             combat_options = [
                 inquirer.List("action",
                               message="Choose your action:",
-                              choices=["Attack", "Spells", "Use Items", "Block", "Inspect"])
+                              choices=["Attack", "Spells", "Use Items", "Block"])
             ]
             action = inquirer.prompt(combat_options)["action"]
 
@@ -457,10 +497,6 @@ def handle_enemy_encounter(player, current_position):
             elif action == "Block":
                 # Implement blocking logic
                 block(player, enemy)
-            elif action == "Inspect":
-                # Print enemy description
-                print(f"\n{enemy.name}: {enemy.description}\n")
-                wait_for_input()
 
         # Check if the enemy is defeated
         if enemy.stats['HP'] <= 0:
@@ -592,7 +628,7 @@ class Game:
                 open_treasure_chest(self.player)
                 self.opened_treasure_chests.append(self.current_position)
             elif current_event.description == CorridorEventType.GOD_ALTAR.value:
-                god_altar(self.player)
+                god_altar(self.player, self.current_event().description)
             elif current_event.description == CorridorEventType.ENEMY_ENCOUNTER.value:
                 handle_enemy_encounter(self.player, self.current_position)
 
