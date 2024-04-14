@@ -1,10 +1,11 @@
 class Monster:
-    def __init__(self, name, stats, gear, loot_table, difficulty, description):
+    def __init__(self, name, stats, gear, loot_table, difficulty, description,floor_range):
         self.name = name
         self.stats = stats
         self.gear = gear
         self.loot_table = loot_table
         self.difficulty = difficulty
+        self.floor_range = floor_range
         self.description = description
 
 # Define monsters and their attributes
@@ -24,7 +25,8 @@ goblin_stats = {
 goblin_gear = ["Rusty Sword", "Tattered Cloth Armor"]
 goblin_loot_table = ["Gold", "Health Potion", "Small Gem"]
 goblin_description = "Goblins are small, agile creatures known for their mischief and love of shiny objects. Despite their size, they can be formidable opponents in combat, relying on their speed and cunning to outmaneuver their foes."
-goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1, description=goblin_description)
+goblin_floor_range = (1,2)
+goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1, description=goblin_description, floor_range=goblin_floor_range)
 
 
 orc_stats = {
@@ -43,7 +45,8 @@ orc_stats = {
 orc_gear = ["Battle Axe", "Chainmail Armor"]
 orc_loot_table = ["Gold", "Health Potion", "Large Gem"]
 orc_description = "Orcs are fierce warriors, towering in stature and wielding massive weapons with ease. They are known for their strength, ferocity, and cunning tactics in battle. Loyalty to their clans drives them to protect their territory at any cost."
-orc = Monster("Orc", orc_stats, orc_gear, orc_loot_table, difficulty=2, description=orc_description)
+orc_floor_range = (3,5)
+orc = Monster("Orc", orc_stats, orc_gear, orc_loot_table, difficulty=2, description=orc_description, floor_range=orc_floor_range)
 
 dragon_stats = {
     "HP": 200,  # Define HP attribute for Dragon
@@ -57,7 +60,8 @@ dragon_stats = {
 dragon_gear = ["Dragon Scale Armor", "Dragon Tooth Dagger"]
 dragon_loot_table = ["Gold", "Dragon Scale", "Dragon Claw"]
 dragon_description = "Dragons are majestic creatures, feared and revered for their immense power and intelligence. With scales as tough as armor and breath as deadly as fire, they rule the skies and dominate the land. Their hoards glitter with treasure, attracting both adventurers and those seeking their favor."
-dragon = Monster("Dragon", dragon_stats, dragon_gear, dragon_loot_table, difficulty=5, description=dragon_description)
+dragon_floor_range = (5,10)
+dragon = Monster("Dragon", dragon_stats, dragon_gear, dragon_loot_table, difficulty=5, description=dragon_description, floor_range=dragon_floor_range)
 
 
 edouard_stats = {
@@ -78,7 +82,8 @@ edouard_stats = {
 edouard_gear = ["Butter knife"]
 edouard_loot_table = ["Gold", "Edouard's ears"]
 edouard_description = "Edouard is a strange young half-elf wearing a fierce butter knife in his right hand"
-edouard = Monster("Edouard", edouard_stats, edouard_gear, edouard_loot_table, difficulty=1, description=edouard_description)
+edouard_floor_range = (10,20)
+edouard = Monster("Edouard", edouard_stats, edouard_gear, edouard_loot_table, difficulty=1, description=edouard_description, floor_range=edouard_floor_range)
 
 
 torgorak_stats = {
@@ -101,7 +106,8 @@ torgorak_gear = [""]
 torgorak_loot_table = ["Gold", "Torgorak's Tooth"]
 torgorak_description = "Torgorak is... a small hamster wearing a cape"
 #Torgorak's Tooth is a dagger made from a tooth of Torgorak. To define
-torgorak = Monster("Torgorak, devour of world", torgorak_stats, torgorak_gear, torgorak_loot_table, difficulty=12,description=torgorak_description)
+torgorak_floor_range = (12,20)
+torgorak = Monster("Torgorak, devour of world", torgorak_stats, torgorak_gear, torgorak_loot_table, difficulty=12,description=torgorak_description,floor_range=torgorak_floor_range)
 
 # Add more monsters as needed...
 

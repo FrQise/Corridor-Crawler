@@ -7,6 +7,7 @@ from item_definitions import Weapon, Armor, weapons, armor
 from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
 from itertools import zip_longest
 from pantheon import gods
+from bestiary import Monster
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -31,8 +32,20 @@ class CorridorDungeon:
             self.corridor.append(event)
 
     def generate_event(self):
-        event_types = [event_type.value for event_type in CorridorEventType]
-        return CorridorEvent(random.choice(event_types))
+        event_probabilities = {
+            CorridorEventType.ENEMY_ENCOUNTER.value: 2,  # 10% chance for enemy encounter
+            CorridorEventType.TREASURE_CHEST.value: 0.05,   # 5% chance for treasure chest
+            CorridorEventType.TRAP.value: 0.1,             # 10% chance for trap
+            CorridorEventType.EMPTY_CORRIDOR.value: 0.6,   # 60% chance for empty corridor
+            CorridorEventType.GOD_ALTAR.value: 0.15        # 15% chance for god altar
+            # Adjust the probabilities as needed
+        }
+        
+        event_types = list(event_probabilities.keys())
+        probabilities = list(event_probabilities.values())
+
+        chosen_event = random.choices(event_types, weights=probabilities, k=1)[0]
+        return CorridorEvent(chosen_event)
 
     def display_corridor(self):
         for i, event in enumerate(self.corridor):
@@ -425,7 +438,6 @@ def god_altar(player, altar_description):
     wait_for_input()
 
 def game_over():
-    print("GAME OVER")
     input("Press any key to quit the game...")
     exit()
 
@@ -437,24 +449,26 @@ def handle_hp_reduction(player, hp_reduction_amount):
     player.stats['HP'] -= hp_reduction_amount
     check_player_hp(player)
 
-def calculate_encounter_difficulty(current_position):
-    # Calculate difficulty based on the current position
-    # For example, you might want the difficulty to increase as the player progresses deeper into the dungeon
-    # You can define your own formula here based on your game design
-    return min(current_position // 2 + 1, 5)  # Example formula, capped at difficulty level 5
-
-def handle_enemy_encounter(player, current_position):
-    # Calculate encounter difficulty
-    encounter_difficulty = calculate_encounter_difficulty(current_position)
-
+def handle_enemy_encounter(player, current_difficulty):
     # Dynamically import the bestiary module
     bestiary = importlib.import_module('bestiary')
 
-    # Filter enemies based on difficulty level
-    possible_enemies = [enemy for enemy in [bestiary.goblin, bestiary.orc, bestiary.dragon] if enemy.difficulty <= encounter_difficulty]
+    # Get all attributes from the bestiary module
+    all_monsters = [getattr(bestiary, attr) for attr in dir(bestiary) if isinstance(getattr(bestiary, attr), Monster)]
+
+    # Filter enemies based on floor range and current position
+    possible_enemies = [
+        enemy for enemy in all_monsters
+        if current_difficulty >= enemy.floor_range[0]
+    ]
 
     # Choose a random enemy from the list of possible enemies
-    enemy = random.choice(possible_enemies)
+    if possible_enemies:
+        enemy = random.choice(possible_enemies)
+    else:
+        # If no enemy matches the criteria, return without encounter
+        print("No enemies found for this encounter.")
+        return
 
     # Display initial enemy encounter
     print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
@@ -464,7 +478,7 @@ def handle_enemy_encounter(player, current_position):
     while True:
         # Check if the player is defeated
         if player.stats['HP'] <= 0:
-            print("You have been defeated!")
+            print("\n\033[1mYou have been defeated!\033[0m\n")
             check_player_hp(player)
             return  # Exit the combat loop if the player is defeated
 
@@ -501,7 +515,7 @@ def handle_enemy_encounter(player, current_position):
 
         # Check if the enemy is defeated
         if enemy.stats['HP'] <= 0:
-            print(f"\n{enemy.name} has been defeated!")
+            print(f"\n\033[1m{enemy.name} has been defeated!\033[0m\n")
             break  # Exit the combat loop if the enemy is defeated
 
         # Check if the player is defeated after taking action
@@ -580,11 +594,7 @@ def enemy_action(player, enemy):
             print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
         
         player.stats['HP'] -= damage_dealt
-        if player.stats['HP'] <= 0:
-            print("You have been defeated!")
-            # Add any other game over logic here
-    else:
-        print(f"{enemy.name} attacks! Unable to determine the outcome of the attack.")
+
 
 
 class GameState:
@@ -599,6 +609,7 @@ class Game:
         self.current_position = 0  # Initialize player's position
         self.states = []
         self.opened_treasure_chests = []  # Track opened treasure chests
+        self.current_difficulty = 1 # Initialize the current difficulty level
 
     def push_state(self, state):
         self.states.append(state)
@@ -622,6 +633,7 @@ class Game:
             print("\nCurrent Corridor Event:")
             print(current_event.description)
             print("Current position :", self.current_position)
+            print("Current floor", self.current_difficulty)
             check_room(self.player)
 
             # Handle treasure room event only if it hasn't been opened yet
@@ -631,7 +643,7 @@ class Game:
             elif current_event.description == CorridorEventType.GOD_ALTAR.value:
                 god_altar(self.player, self.current_event().description)
             elif current_event.description == CorridorEventType.ENEMY_ENCOUNTER.value:
-                handle_enemy_encounter(self.player, self.current_position)
+                handle_enemy_encounter(self.player, self.current_difficulty)
 
             # Player options
             questions = [
@@ -641,7 +653,18 @@ class Game:
             answer = inquirer.prompt(questions)["action"]
 
             if answer == "Move forward":
-                self.current_position = move_forward(self.current_position)  # Update player's position
+                if self.current_position == self.corridor_dungeon.corridor_length - 1:  # Check if it's the last room
+                    print("You reached the last room of this floor. Get ready to descend")
+                    # Generate a new corridor with increased difficulty
+                    self.current_difficulty += 1  # Increase the current difficulty level
+                    self.corridor_dungeon = CorridorDungeon(corridor_length=10)  # Adjust the corridor length as needed
+                    self.corridor_dungeon.generate_corridor()
+                    self.player.stats["HP"] = self.player.calculate_hp()  # Reset player's HP
+                    self.player.stats["MP"] = self.player.calculate_mp()  # Reset player's MP
+                    self.current_position = 0  # Reset player's position to the start of the new corridor
+                    wait_for_input()
+                else:
+                    self.current_position = move_forward(self.current_position)  # Update player's position
             elif answer == "Check Stats":
                 check_stats(self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
@@ -726,24 +749,18 @@ def select_starting_gear(selected_class):
 
 def main():
     print("""                   
-        _____         ____     ___________      ___________        ____________  ____________          ____     ___________                     _____  ___________          _____           _______     _______  _____               _____\    \ ___________       
-   _____\    \_   ____\_  \__  \          \     \          \      /            \ \           \     ____\_  \__  \          \               _____\    \_\          \       /      |_        /      /|   |\      \|\    \             /    / |    |\          \      
-  /     /|     | /     /     \  \    /\    \     \    /\    \    |\___/\  \\___/| \           \   /     /     \  \    /\    \             /     /|     |\    /\    \     /         \      /      / |   | \      \\\    \           /    /  /___/| \    /\    \     
- /     / /____/|/     /\      |  |   \_\    |     |   \_\    |    \|____\  \___|/  |    /\     | /     /\      |  |   \_\    |           /     / /____/| |   \_\    |   |     /\    \    |      /  |___|  \      |\\    \         |    |__ |___|/  |   \_\    |    
-|     | |____|/|     |  |     |  |      ___/      |      ___/           |  |       |   |  |    ||     |  |     |  |      ___/           |     | |____|/  |      ___/    |    |  |    \   |      |  |   |  |      | \|    | ______ |       \        |      ___/     
-|     |  _____ |     |  |     |  |      \  ____   |      \  ____   __  /   / __    |    \/     ||     |  |     |  |      \  ____        |     |  _____   |      \  ____ |     \/      \  |       \ \   / /       |  |    |/      \|     __/ __     |      \  ____  
-|\     \|\    \|     | /     /| /     /\ \/    \ /     /\ \/    \ /  \/   /_/  |  /           /||     | /     /| /     /\ \/    \       |\     \|\    \ /     /\ \/    \|\      /\     \ |      |\\/   \//|      |  /            ||\    \  /  \   /     /\ \/    \ 
-| \_____\|    ||\     \_____/ |/_____/ |\______|/_____/ |\______||____________/| /___________/ ||\     \_____/ |/_____/ |\______|       | \_____\|    |/_____/ |\______|| \_____\ \_____\|\_____\|\_____/|/_____/| /_____/\_____/|| \____\/    | /_____/ |\______| 
-| |     /____/|| \_____\   | / |     | | |     ||     | | |     ||           | /|           | / | \_____\   | / |     | | |     |       | |     /____/||     | | |     || |     | |     || |     | |   | |     | ||      | |    ||| |    |____/| |     | | |     | 
- \|_____|    || \ |    |___|/  |_____|/ \|_____||_____|/ \|_____||___________|/ |___________|/   \ |    |___|/  |_____|/ \|_____|        \|_____|    |||_____|/ \|_____| \|_____|\|_____| \|_____|\|___|/|_____|/ |______|/|____|/ \|____|   | | |_____|/ \|_____| 
-        |____|/  \|____|                                                                          \|____|                                       |____|/                                                                                  |___|/                    
-    """)
+   ___                _     _                ___                   _           
+  / __\___  _ __ _ __(_) __| | ___  _ __    / __\ __ __ ___      _| | ___ _ __ 
+ / /  / _ \| '__| '__| |/ _` |/ _ \| '__|  / / | '__/ _` \ \ /\ / / |/ _ \ '__|
+/ /__| (_) | |  | |  | | (_| | (_) | |    / /__| | | (_| |\ V  V /| |  __/ |   
+\____/\___/|_|  |_|  |_|\__,_|\___/|_|    \____/_|  \__,_| \_/\_/ |_|\___|_|   
+
+""")
     wait_for_input()
     while True:
-        print("\nMain Menu:")
         menu_choices = [
             inquirer.List("choice",
-                          message="Select an option:",
+                          message="\033[1m\033[4mMain Menu:\033[0m",
                           choices=[
                               "Start a new game",
                               "Load",
