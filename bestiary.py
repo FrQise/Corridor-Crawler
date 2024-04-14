@@ -1,7 +1,8 @@
 class Monster:
-    def __init__(self, name, stats, gear, loot_table, difficulty, description,floor_range):
+    def __init__(self, name, stats, gear, loot_table, difficulty, description, floor_range):
         self.name = name
         self.stats = stats
+        self.initial_stats = stats.copy()
         self.gear = gear
         self.loot_table = loot_table
         self.difficulty = difficulty

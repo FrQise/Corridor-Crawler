@@ -472,6 +472,7 @@ def handle_enemy_encounter(player, current_difficulty):
 
     # Reset enemy's HP before the encounter
     enemy.stats['HP'] = enemy.initial_hp
+    enemy.stats = enemy.initial_stats
 
     # Display initial enemy encounter
     print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
