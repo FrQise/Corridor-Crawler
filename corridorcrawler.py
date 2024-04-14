@@ -39,7 +39,8 @@ class CorridorDungeon:
             print(f"Corridor Position {i+1}: {event.description}")
 
 class Player:
-    def __init__(self, race=None, char_class=None, starting_gear=None):
+    def __init__(self, name, race=None, char_class=None, starting_gear=None):
+        self.name = name
         self.race = race
         self.char_class = char_class
         self.stats = {  
@@ -160,10 +161,10 @@ def move_forward(position):
     return position + 1
 
 def check_room(player):
-    print("\nPlayer:")
+    print("\n" + player.name + ":")  # Print the player's chosen name
+    print(f"Race: {player.race.name} | Class: {player.char_class.name}\n")
     print(f"\033[91mHP: {player.stats['HP']}\033[0m")  # Red color for HP
-    print(f"\033[94mMP: {player.stats['MP']}\033[0m")  # Blue color for MP
-    print(f"Race: {player.race.name} | Class: {player.char_class.name}")
+    print(f"\033[94mMP: {player.stats['MP']}\033[0m\n")  # Blue color for MP
     print(f"Holding: {player.get_current_weapon().name if player.get_current_weapon() else 'None'}")
 
 def check_stats(player):
@@ -672,7 +673,7 @@ def select_character():
     # Select race
     race_questions = [
         inquirer.List("race",
-                      message="Choose your race:",
+                      message="Choose your race",
                       choices=[race.name for race in races])
     ]
     selected_race = Race("Human", "Adaptable and versatile")  # Default to Human
@@ -685,7 +686,7 @@ def select_character():
     # Select class
     class_questions = [
         inquirer.List("class",
-                      message="Choose your class:",
+                      message="Choose your class",
                       choices=[char_class.name for char_class in classes])
     ]
     selected_class = None
@@ -724,7 +725,7 @@ def select_starting_gear(selected_class):
     return starting_gear
 
 def main():
-    print("""                                                                                                                                                                                                                                          _____
+    print("""                   
         _____         ____     ___________      ___________        ____________  ____________          ____     ___________                     _____  ___________          _____           _______     _______  _____               _____\    \ ___________       
    _____\    \_   ____\_  \__  \          \     \          \      /            \ \           \     ____\_  \__  \          \               _____\    \_\          \       /      |_        /      /|   |\      \|\    \             /    / |    |\          \      
   /     /|     | /     /     \  \    /\    \     \    /\    \    |\___/\  \\___/| \           \   /     /     \  \    /\    \             /     /|     |\    /\    \     /         \      /      / |   | \      \\\    \           /    /  /___/| \    /\    \     
@@ -762,11 +763,22 @@ def main():
             print("Exiting the game. Goodbye!")
             break
 
+def get_valid_player_name():
+    while True:
+        player_name = input("Enter your character's name (up to 15 characters): ").strip()
+        if not player_name:
+            print("Please enter a non-empty name.")
+        elif len(player_name) > 15:
+            print("Name cannot exceed 15 characters.")
+        else:
+            return player_name
+
 def start_new_game():
+    player_name = get_valid_player_name()
     selected_race, selected_class = select_character()
     starting_gear = select_starting_gear(selected_class)
 
-    player = Player(selected_race, selected_class, starting_gear)
+    player = Player(player_name, selected_race, selected_class, starting_gear)
 
     game = Game()
     game.player = player  # Assign the player object to the game
