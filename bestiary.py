@@ -1,10 +1,11 @@
 class Monster:
-    def __init__(self, name, stats, gear, loot_table, difficulty):
+    def __init__(self, name, stats, gear, loot_table, difficulty, description):
         self.name = name
         self.stats = stats
         self.gear = gear
         self.loot_table = loot_table
         self.difficulty = difficulty
+        self.description = description
 
 # Define monsters and their attributes
 goblin_stats = {
@@ -22,7 +23,8 @@ goblin_stats = {
 }
 goblin_gear = ["Rusty Sword", "Tattered Cloth Armor"]
 goblin_loot_table = ["Gold", "Health Potion", "Small Gem"]
-goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1)
+goblin_description = "Goblins are small, agile creatures known for their mischief and love of shiny objects. Despite their size, they can be formidable opponents in combat, relying on their speed and cunning to outmaneuver their foes."
+goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1, description=goblin_description)
 
 
 orc_stats = {
@@ -40,7 +42,8 @@ orc_stats = {
 }
 orc_gear = ["Battle Axe", "Chainmail Armor"]
 orc_loot_table = ["Gold", "Health Potion", "Large Gem"]
-orc = Monster("Orc", orc_stats, orc_gear, orc_loot_table, difficulty=2)
+orc_description = "Orcs are fierce warriors, towering in stature and wielding massive weapons with ease. They are known for their strength, ferocity, and cunning tactics in battle. Loyalty to their clans drives them to protect their territory at any cost."
+orc = Monster("Orc", orc_stats, orc_gear, orc_loot_table, difficulty=2, description=orc_description)
 
 dragon_stats = {
     "HP": 200,  # Define HP attribute for Dragon
@@ -53,7 +56,52 @@ dragon_stats = {
 }
 dragon_gear = ["Dragon Scale Armor", "Dragon Tooth Dagger"]
 dragon_loot_table = ["Gold", "Dragon Scale", "Dragon Claw"]
-dragon = Monster("Dragon", dragon_stats, dragon_gear, dragon_loot_table, difficulty=5)
+dragon_description = "Dragons are majestic creatures, feared and revered for their immense power and intelligence. With scales as tough as armor and breath as deadly as fire, they rule the skies and dominate the land. Their hoards glitter with treasure, attracting both adventurers and those seeking their favor."
+dragon = Monster("Dragon", dragon_stats, dragon_gear, dragon_loot_table, difficulty=5, description=dragon_description)
+
+
+edouard_stats = {
+    "HP": 200,
+    "Damage" : 1, #Define damage attribute
+    "Defense" : 3, #Define Defense vs attack stat
+    "Magic Defense" : 0, #Mdef vs Matk
+    "Strength": 1,
+    "Dexterity": 1,
+    "Constitution": 18,
+    "Intelligence": 1,
+    "Wisdom": 1,
+    "Charisma": 5
+}
+# Need to add description. He'll try to rob merchant that we encounter, everytime he'll flee before dying, 
+# the first time we'll cut his left ear, the second time his right ear, if we meet him a 3rd time he'll give us good loot he stole from his rich parents
+
+edouard_gear = ["Butter knife"]
+edouard_loot_table = ["Gold", "Edouard's ears"]
+edouard_description = "Edouard is a strange young half-elf wearing a fierce butter knife in his right hand"
+edouard = Monster("Edouard", edouard_stats, edouard_gear, edouard_loot_table, difficulty=1, description=edouard_description)
+
+
+torgorak_stats = {
+    "HP": 200,
+    "Damage" : 50, #Define damage attribute
+    "Defense" : 35, #Define Defense vs attack stat
+    "Magic Defense" : 45, #Mdef vs Matk
+    "Strength": 17,
+    "Dexterity": 15,
+    "Constitution": 18,
+    "Intelligence": 13,
+    "Wisdom": 12,
+    "Charisma": 14
+}
+# Need to add description. Torgorak can cast a spell that will devour the reality, teleporting the player into a new biome, difficulty for every floor go +1.
+# If the player let Torgorak use this spell : Torgorak will flee, not looting anything but you'll have access to the new biome (to define)
+# If the player kill Torgorak before he cast the devour spell, he'll have the loot
+
+torgorak_gear = [""]
+torgorak_loot_table = ["Gold", "Torgorak's Tooth"]
+torgorak_description = "Torgorak is... a small hamster wearing a cape"
+#Torgorak's Tooth is a dagger made from a tooth of Torgorak. To define
+torgorak = Monster("Torgorak, devour of world", torgorak_stats, torgorak_gear, torgorak_loot_table, difficulty=12,description=torgorak_description)
 
 # Add more monsters as needed...
 

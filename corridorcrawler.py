@@ -410,13 +410,13 @@ def handle_enemy_encounter(player, current_position):
     bestiary = importlib.import_module('bestiary')
 
     # Filter enemies based on difficulty level
-    possible_enemies = [enemy for enemy in [bestiary.goblin, bestiary.orc, bestiary.dragon] if enemy.difficulty <= encounter_difficulty]
+    possible_enemies = [enemy for enemy in [bestiary.goblin, bestiary.orc, bestiary.dragon, bestiary.edouard] if enemy.difficulty <= encounter_difficulty]
 
     # Choose a random enemy from the list of possible enemies
     enemy = random.choice(possible_enemies)
 
     # Display initial enemy encounter
-    print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
+    print(f"\n\033[1;33mYou encounter {enemy.name}\033[0m")
     print("Prepare for battle!")
 
     # Combat loop
@@ -441,7 +441,7 @@ def handle_enemy_encounter(player, current_position):
             combat_options = [
                 inquirer.List("action",
                               message="Choose your action:",
-                              choices=["Attack", "Spells", "Use Items", "Block"])
+                              choices=["Attack", "Spells", "Use Items", "Block", "Inspect"])
             ]
             action = inquirer.prompt(combat_options)["action"]
 
@@ -457,6 +457,10 @@ def handle_enemy_encounter(player, current_position):
             elif action == "Block":
                 # Implement blocking logic
                 block(player, enemy)
+            elif action == "Inspect":
+                # Print enemy description
+                print(f"\n{enemy.name}: {enemy.description}\n")
+                wait_for_input()
 
         # Check if the enemy is defeated
         if enemy.stats['HP'] <= 0:
