@@ -470,6 +470,9 @@ def handle_enemy_encounter(player, current_difficulty):
         print("No enemies found for this encounter.")
         return
 
+    # Reset enemy's HP before the encounter
+    enemy.stats['HP'] = enemy.initial_hp
+
     # Display initial enemy encounter
     print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
     print("Prepare for battle!")
@@ -528,6 +531,7 @@ def handle_enemy_encounter(player, current_difficulty):
             enemy_action(player, enemy)
 
     wait_for_input()  # Wait for player input before continuing
+
 
 def attack(player, enemy):
     # Get the equipped weapon of the player

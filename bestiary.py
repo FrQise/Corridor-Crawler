@@ -7,6 +7,7 @@ class Monster:
         self.difficulty = difficulty
         self.floor_range = floor_range
         self.description = description
+        self.initial_hp = stats["HP"] #Initialize initial HP attribute
 
 # Define monsters and their attributes
 goblin_stats = {
