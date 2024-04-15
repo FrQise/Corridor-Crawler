@@ -1,7 +1,5 @@
-
-
 class Spell:
-    def __init__(self, name, description, damage_type, damage, category, spell_type, player_buff=None, monster_debuff=None, extra_effect=None, checklist=True, false_message=None):
+    def __init__(self, name, description, damage_type, damage, category, spell_type, player_buff=None, monster_debuff=None, extra_effect=None):
         self.name = name
         self.description = description
         self.damage_type = damage_type
@@ -11,8 +9,6 @@ class Spell:
         self.player_buff = player_buff  # Dictionary to store player stat buffs
         self.monster_debuff = monster_debuff  # Dictionary to store monster stat debuffs
         self.extra_effect = extra_effect  # Extra effect of the spell
-        self.checklist = checklist  # Boolean to check if the spell can be used
-        self.false_message = false_message  # Message if the spell cannot be used
 
 # Define spells for each category
 evocation_spells = [
@@ -37,7 +33,7 @@ monster_debuff = {'defense': -2}  # Example: Decrease monster's defense
 buff_spells = [
     Spell("Strength of the Bear", "Grant the caster the strength of a bear.", None, damage=0, category="Buff", spell_type="Buff", player_buff=player_buff),
     Spell("Weakness Curse", "Curse the enemy to weaken their defenses.", None, damage=0, category="Debuff", spell_type="Debuff", monster_debuff=monster_debuff),
-    #Spell("Healing Light", "Channel healing light to restore HP.", None, damage=0, category="Buff", spell_type="Buff", player_buff={'HP': 10}, checklist=("HP" not in player_buff or player_buff["HP"] > 0) and Player.player.stats["HP"] < Player.player.calculate_hp(), false_message="You're already at full health.")
+    Spell("Healing Light", "Channel healing light to restore HP.", None, damage=0, category="Buff", spell_type="Buff", player_buff={'HP': 10}, extra_effect="Healing")
     # Add more buff/debuff spells...
 ]
 

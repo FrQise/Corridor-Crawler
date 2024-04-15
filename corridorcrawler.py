@@ -76,12 +76,11 @@ class Player:
             "Poison Resistance": 0,
             "Darkness Resistance": 0
         }
+        self.starting_stats = self.stats.copy()
         self.god = None
         self.equipment = Equipment()
         self.inventory = []
         self.spells = [] # Initialize an empty list to store spells
-        self.max_hp = self.calculate_hp
-        self.max_mp = self.calculate_mp
         self.apply_race_modifiers()
         if char_class:
             char_class.apply_class_modifiers(self.stats)
@@ -91,6 +90,8 @@ class Player:
         # Calculate HP after initializing stats
         self.stats["HP"] = self.calculate_hp()
         self.stats["MP"] = self.calculate_mp()
+        self.max_hp = self.calculate_hp()
+        self.max_mp = self.calculate_mp()
 
     def learn_spell(self, spell):
         self.spells.append(spell)
@@ -260,6 +261,7 @@ def view_equipment_details(player):
     answer = inquirer.prompt(questions)["item_action"]
 
     if answer != "Back":
+        verify_stats(player)
         for slot, item in player.equipment.slots.items():
             if item and item.name == answer:
                 print(f"\nName: {item.name}")
@@ -275,7 +277,7 @@ def view_equipment_details(player):
 def check_inventory(game, player):
     game.event_resolved = True
     for spell in spells.all_spells:
-        if spell.name == "Flame Burst":
+        if spell.name == "Healing Light":
             player.learn_spell(spell)
     print("\nPlayer Inventory:")
     for i, item in enumerate(player.inventory):
@@ -365,15 +367,19 @@ def equip_item(player):
 
                 # Remove the item from the inventory
                 del player.inventory[item_index]
+                verify_stats(player)
                 wait_for_input()
                 return
             else:
+                verify_stats(player)
                 print("\nInvalid item index. Please enter a valid number.")
         else:
+            verify_stats(player)
             print("\nInvalid input. Please enter a number or 'b' to go back.")
 
 def use_item(player):
     # Implement item usage logic here
+    verify_stats(player)
     pass
 
 def wait_for_input():
@@ -413,6 +419,7 @@ def god_altar(game, player, altar_description):
         if current_god == selected_god.name:
             print("This is the altar of your current god.")
             game.event_resolved = True  # Set the flag to indicate that the event has been resolved
+            verify_stats(player)
             wait_for_input()
             return
 
@@ -424,6 +431,7 @@ def god_altar(game, player, altar_description):
         betray_answer = inquirer.prompt(betray_question)["betray_current_god"]
         if betray_answer:
             print(f"\nYou decided to betray {current_god}.")
+            verify_stats(player)
             player.stats.pop('God')
         else:
             print("\nYou decided to remain loyal to your current god.")
@@ -445,10 +453,19 @@ def god_altar(game, player, altar_description):
         for stat, value in selected_god.buffs.items():
             player.stats[stat] += value
         player.god = selected_god.name
+        verify_stats(player)
     else:
         print("\nYou decided not to worship any god at this time.")
 
     wait_for_input()
+
+def verify_stats(player):
+    if player.stats != player.starting_stats:
+        new_max_hp = player.calculate_hp()  # Calculate the new max_hp
+        hp_difference = new_max_hp - player.max_hp  # Calculate the difference in max_hp
+        player.max_hp = new_max_hp  # Update max_hp
+        player.stats["HP"] += hp_difference  # Update HP with the difference in max_hp
+
 
 def game_over():
     input("Press any key to quit the game...")
@@ -546,7 +563,6 @@ def handle_enemy_encounter(game, player, current_difficulty):
             enemy_action(player, enemy)
 
     wait_for_input()  # Wait for player input before continuing
-
 
 def attack(player, enemy):
     # Get the equipped weapon of the player
@@ -654,12 +670,19 @@ def use_spell(player):
 
 def apply_spell_buff(player, spell):
     if spell.player_buff:
+        if spell.extra_effect == "Healing" and player.stats['HP'] >= player.max_hp:
+            verify_stats(player)
+            print("\nYou're already at full health.")
+            wait_for_input()
+            return
+
         for stat, value in spell.player_buff.items():
             if stat in player.stats:
                 player.stats[stat] += value
             else:
                 # Add the stat to the player's stats if it doesn't exist
                 player.stats[stat] = value
+        verify_stats(player)
         print(f"\nApplied {spell.name}.")
         wait_for_input()
     else:
@@ -792,15 +815,19 @@ class Game:
                 else:
                     self.current_position = move_forward(self.current_position)  # Update player's position
             elif answer == "Check Stats":
+                verify_stats(self.player)
                 check_stats(self, self.player)
             elif answer == "Check Equipment":
+                verify_stats(self.player)
                 check_equipment(self, self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
             elif answer == "Check Inventory":
                 check_inventory(self, self.player)
+                verify_stats(self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
             elif answer == "Spells":
                 check_spells(self, self.player)  # Show the sub-menu for spells
+                verify_stats(self.player)
                 self.pop_state() 
             elif answer == "Save":
                 self.save_game(self)  # Call the save_game method of the Game instance
