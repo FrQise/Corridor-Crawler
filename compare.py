@@ -1,15 +1,11 @@
 import random
 from enum import Enum
 import inquirer
-import importlib
-import sys
-import pickle
-import os
 from item_definitions import Weapon, Armor, weapons, armor
 from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
+import importlib
+import sys
 from itertools import zip_longest
-from pantheon import gods
-from bestiary import Monster
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -34,28 +30,15 @@ class CorridorDungeon:
             self.corridor.append(event)
 
     def generate_event(self):
-        event_probabilities = {
-            CorridorEventType.ENEMY_ENCOUNTER.value: 2,  # 10% chance for enemy encounter
-            CorridorEventType.TREASURE_CHEST.value: 0.05,   # 5% chance for treasure chest
-            CorridorEventType.TRAP.value: 0.1,             # 10% chance for trap
-            CorridorEventType.EMPTY_CORRIDOR.value: 0.6,   # 60% chance for empty corridor
-            CorridorEventType.GOD_ALTAR.value: 0.15        # 15% chance for god altar
-            # Adjust the probabilities as needed
-        }
-        
-        event_types = list(event_probabilities.keys())
-        probabilities = list(event_probabilities.values())
-
-        chosen_event = random.choices(event_types, weights=probabilities, k=1)[0]
-        return CorridorEvent(chosen_event)
+        event_types = [event_type.value for event_type in CorridorEventType]
+        return CorridorEvent(random.choice(event_types))
 
     def display_corridor(self):
         for i, event in enumerate(self.corridor):
             print(f"Corridor Position {i+1}: {event.description}")
 
 class Player:
-    def __init__(self, name, race=None, char_class=None, starting_gear=None):
-        self.name = name
+    def __init__(self, race=None, char_class=None, starting_gear=None):
         self.race = race
         self.char_class = char_class
         self.stats = {  
@@ -75,7 +58,6 @@ class Player:
             "Poison Resistance": 0,
             "Darkness Resistance": 0
         }
-        self.god = None
         self.equipment = Equipment()
         self.inventory = []
         self.apply_race_modifiers()
@@ -176,15 +158,15 @@ def move_forward(position):
     return position + 1
 
 def check_room(player):
-    print("\n" + player.name + ":")  # Print the player's chosen name
-    print(f"Race: {player.race.name} | Class: {player.char_class.name}\n")
+    print("\nPlayer:")
     print(f"\033[91mHP: {player.stats['HP']}\033[0m")  # Red color for HP
-    print(f"\033[94mMP: {player.stats['MP']}\033[0m\n")  # Blue color for MP
+    print(f"\033[94mMP: {player.stats['MP']}\033[0m")  # Blue color for MP
+    print(f"Race: {player.race.name} | Class: {player.char_class.name}")
     print(f"Holding: {player.get_current_weapon().name if player.get_current_weapon() else 'None'}")
 
 def check_stats(player):
     print("\n\033[1m\033[4mPlayer Stats:\033[0m")
-
+    
     # Exclude HP and MP stats from printing
     stats_to_exclude = ["HP", "MP"]
 
@@ -209,15 +191,15 @@ def check_stats(player):
     for stat, resistance in zip_longest(stats_column, resistances_column, fillvalue=""):
         print(f"{stat:<{total_width}}{resistance}")
 
-    # Print god if it exists
-    if hasattr(player, 'god'):
-        print(f"\n\033[1m\033[4mGod:\033[0m {player.god}")
-
     # Print proficiencies
     print("\n\033[1m\033[4mProficiencies:\033[0m")
     print(f"Weapon Proficiencies: {', '.join(player.char_class.weapon_proficiencies)}")
     print(f"Armor Proficiencies: {', '.join(player.char_class.armor_proficiencies)}")
+
     wait_for_input()
+
+
+
 
 def check_equipment(player):
     print("\nPlayer Equipment:")
@@ -368,75 +350,41 @@ def wait_for_input():
     # Move the cursor to the beginning of the line and clear it
     sys.stdout.write("\033[F\033[K")
 
+def save_game():
+    print("\nSaving game...\n")
+
 def open_treasure_chest(player):
     print("\nYou just entered a treasure room!")
     questions = [
-        inquirer.List("open_chest",
-                      message="Do you want to open the chest?",
-                      choices=["Yes", "No"],
-                      default="Yes")
+        inquirer.Confirm("open_chest",
+                         message="Do you want to open the chest?",
+                         default=True)
     ]
     answer = inquirer.prompt(questions)["open_chest"]
-    if answer == "Yes":
-        print("\nYou found a Longsword, a Chain Shirt, and a Basic Shield!")
-        for item in weapons + armor:
-            if item.name in ["Longsword", "Chain Shirt", "Basic Shield"]:
-                player.inventory.append(item)
-        print("\nThe Longsword, Chain Shirt, and Basic Shield have been added to your inventory.")
-        wait_for_input()
+    if answer:
+        print("\nYou found a Longsword and a Chain Shirt and a Basic Shield!")
+        for weapon in weapons:
+            if weapon.name == "Longsword":
+                player.inventory.append(weapon)
+        for armor_piece in armor:
+            if armor_piece.name == "Chain Shirt":
+                player.inventory.append(armor_piece)
+            if armor_piece.name == "Basic Shield":
+                player.inventory.append(armor_piece)
+        print("\nThe Longsword and Chain Shirt have been added to your inventory.")
 
-
-def god_altar(player, altar_description):
-    print("\n\nYou just found the Altar of", end=" ")
-
-    # Randomly select a god
-    selected_god = random.choice(gods)
-    print(selected_god.name)
-
-    print("\nDescription:", selected_god.description,"\n")
-
-    current_god = player.stats.get('God', None)
-    if current_god:
-        if current_god == selected_god.name:
-            print("This is the altar of your current god.")
-            wait_for_input()
-            return
-
-        print(f"\nYou are currently worshiping {current_god}.")
-        betray_question = [inquirer.List("betray_current_god", 
-                                         message="Do you want to betray your current god and worship a new one?", 
-                                         choices=["Yes", "No"], 
-                                         default="No")]
-        betray_answer = inquirer.prompt(betray_question)["betray_current_god"]
-        if betray_answer:
-            print(f"\nYou decided to betray {current_god}.")
-            player.stats.pop('God')
-        else:
-            print("\nYou decided to remain loyal to your current god.")
-            wait_for_input()
-            return
-    
-    # Ask the player if they want to worship the selected god
-    questions = [
-        inquirer.List("worship_confirm",
-                      message=f"Do you want to worship {selected_god.name}?",
-                      choices=["Yes", "No"],
-                      default="No")
-    ]
-    worship_confirm = inquirer.prompt(questions)["worship_confirm"]
-
-    if worship_confirm == "Yes":
-        print(f"\nYou decided to worship {selected_god.name}.")
-        # Apply buffs to the player based on the selected god
-        for stat, value in selected_god.buffs.items():
-            player.stats[stat] += value
-        player.stats['God'] = selected_god.name
-    else:
-        print("\nYou decided not to worship any god at this time.")
-
+def god_altar(player):
+    print("\nYou just found a God Altar")
+    questions = [inquirer.Confirm("worship_god", message="Do you wish to worship God_Placerholder ?", default=True)]
+    answer = inquirer.prompt(questions)["worship_god"]
+    if answer:
+        print("\nYou decided to worship God_Placeholder")
+        print("\nHere are your modifiers: ADD_MODIFIERS")
+    else: print("You decided to not worship God_Placeholder, they might take offense of this.")
     wait_for_input()
 
 def game_over():
+    print("GAME OVER")
     input("Press any key to quit the game...")
     exit()
 
@@ -448,30 +396,24 @@ def handle_hp_reduction(player, hp_reduction_amount):
     player.stats['HP'] -= hp_reduction_amount
     check_player_hp(player)
 
-def handle_enemy_encounter(player, current_difficulty):
+def calculate_encounter_difficulty(current_position):
+    # Calculate difficulty based on the current position
+    # For example, you might want the difficulty to increase as the player progresses deeper into the dungeon
+    # You can define your own formula here based on your game design
+    return min(current_position // 2 + 1, 5)  # Example formula, capped at difficulty level 5
+
+def handle_enemy_encounter(player, current_position):
+    # Calculate encounter difficulty
+    encounter_difficulty = calculate_encounter_difficulty(current_position)
+
     # Dynamically import the bestiary module
     bestiary = importlib.import_module('bestiary')
 
-    # Get all attributes from the bestiary module
-    all_monsters = [getattr(bestiary, attr) for attr in dir(bestiary) if isinstance(getattr(bestiary, attr), Monster)]
-
-    # Filter enemies based on floor range and current position
-    possible_enemies = [
-        enemy for enemy in all_monsters
-        if current_difficulty >= enemy.floor_range[0]
-    ]
+    # Filter enemies based on difficulty level
+    possible_enemies = [enemy for enemy in [bestiary.goblin, bestiary.orc, bestiary.dragon] if enemy.difficulty <= encounter_difficulty]
 
     # Choose a random enemy from the list of possible enemies
-    if possible_enemies:
-        enemy = random.choice(possible_enemies)
-    else:
-        # If no enemy matches the criteria, return without encounter
-        print("No enemies found for this encounter.")
-        return
-
-    # Reset enemy's HP before the encounter
-    enemy.stats['HP'] = enemy.initial_hp
-    enemy.stats = enemy.initial_stats
+    enemy = random.choice(possible_enemies)
 
     # Display initial enemy encounter
     print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
@@ -481,7 +423,7 @@ def handle_enemy_encounter(player, current_difficulty):
     while True:
         # Check if the player is defeated
         if player.stats['HP'] <= 0:
-            print("\n\033[1mYou have been defeated!\033[0m\n")
+            print("You have been defeated!")
             check_player_hp(player)
             return  # Exit the combat loop if the player is defeated
 
@@ -518,7 +460,7 @@ def handle_enemy_encounter(player, current_difficulty):
 
         # Check if the enemy is defeated
         if enemy.stats['HP'] <= 0:
-            print(f"\n\033[1m{enemy.name} has been defeated!\033[0m\n")
+            print(f"\n{enemy.name} has been defeated!")
             break  # Exit the combat loop if the enemy is defeated
 
         # Check if the player is defeated after taking action
@@ -531,7 +473,6 @@ def handle_enemy_encounter(player, current_difficulty):
             enemy_action(player, enemy)
 
     wait_for_input()  # Wait for player input before continuing
-
 
 def attack(player, enemy):
     # Get the equipped weapon of the player
@@ -598,7 +539,11 @@ def enemy_action(player, enemy):
             print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
         
         player.stats['HP'] -= damage_dealt
-
+        if player.stats['HP'] <= 0:
+            print("You have been defeated!")
+            # Add any other game over logic here
+    else:
+        print(f"{enemy.name} attacks! Unable to determine the outcome of the attack.")
 
 
 class GameState:
@@ -613,26 +558,6 @@ class Game:
         self.current_position = 0  # Initialize player's position
         self.states = []
         self.opened_treasure_chests = []  # Track opened treasure chests
-        self.current_difficulty = 1 # Initialize the current difficulty level
-
-    def save_game(self):
-        print("\nSaving the game...")
-        save_data = {
-            'player': self.player,
-            'current_position': self.current_position,
-            'corridor_dungeon': self.corridor_dungeon,
-            'opened_treasure_chests': self.opened_treasure_chests,
-            'current_difficulty': self.current_difficulty
-        }
-        try:
-            with open('save_game.pkl', 'wb') as f:
-                pickle.dump(save_data, f)
-            print("Game saved successfully!")
-            print("OUH")
-            wait_for_input()
-            self.pop_state()
-        except Exception as e:
-            print(f"Error occurred while saving the game: {str(e)}")
 
     def push_state(self, state):
         self.states.append(state)
@@ -656,7 +581,6 @@ class Game:
             print("\nCurrent Corridor Event:")
             print(current_event.description)
             print("Current position :", self.current_position)
-            print("Current floor", self.current_difficulty)
             check_room(self.player)
 
             # Handle treasure room event only if it hasn't been opened yet
@@ -664,9 +588,9 @@ class Game:
                 open_treasure_chest(self.player)
                 self.opened_treasure_chests.append(self.current_position)
             elif current_event.description == CorridorEventType.GOD_ALTAR.value:
-                god_altar(self.player, self.current_event().description)
+                god_altar(self.player)
             elif current_event.description == CorridorEventType.ENEMY_ENCOUNTER.value:
-                handle_enemy_encounter(self.player, self.current_difficulty)
+                handle_enemy_encounter(self.player, self.current_position)
 
             # Player options
             questions = [
@@ -676,18 +600,7 @@ class Game:
             answer = inquirer.prompt(questions)["action"]
 
             if answer == "Move forward":
-                if self.current_position == self.corridor_dungeon.corridor_length - 1:  # Check if it's the last room
-                    print("You reached the last room of this floor. Get ready to descend")
-                    # Generate a new corridor with increased difficulty
-                    self.current_difficulty += 1  # Increase the current difficulty level
-                    self.corridor_dungeon = CorridorDungeon(corridor_length=10)  # Adjust the corridor length as needed
-                    self.corridor_dungeon.generate_corridor()
-                    self.player.stats["HP"] = self.player.calculate_hp()  # Reset player's HP
-                    self.player.stats["MP"] = self.player.calculate_mp()  # Reset player's MP
-                    self.current_position = 0  # Reset player's position to the start of the new corridor
-                    wait_for_input()
-                else:
-                    self.current_position = move_forward(self.current_position)  # Update player's position
+                self.current_position = move_forward(self.current_position)  # Update player's position
             elif answer == "Check Stats":
                 check_stats(self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
@@ -698,7 +611,7 @@ class Game:
                 check_inventory(self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
             elif answer == "Save":
-                self.save_game()  # Call the save_game method of the Game instance
+                save_game()
 
             # Check if the game ends
             if self.current_position == self.corridor_dungeon.corridor_length:
@@ -719,7 +632,7 @@ def select_character():
     # Select race
     race_questions = [
         inquirer.List("race",
-                      message="Choose your race",
+                      message="Choose your race:",
                       choices=[race.name for race in races])
     ]
     selected_race = Race("Human", "Adaptable and versatile")  # Default to Human
@@ -732,7 +645,7 @@ def select_character():
     # Select class
     class_questions = [
         inquirer.List("class",
-                      message="Choose your class",
+                      message="Choose your class:",
                       choices=[char_class.name for char_class in classes])
     ]
     selected_class = None
@@ -771,92 +684,14 @@ def select_starting_gear(selected_class):
     return starting_gear
 
 def main():
-    print("""                   
-   ___                _     _                ___                   _           
-  / __\___  _ __ _ __(_) __| | ___  _ __    / __\ __ __ ___      _| | ___ _ __ 
- / /  / _ \| '__| '__| |/ _` |/ _ \| '__|  / / | '__/ _` \ \ /\ / / |/ _ \ '__|
-/ /__| (_) | |  | |  | | (_| | (_) | |    / /__| | | (_| |\ V  V /| |  __/ |   
-\____/\___/|_|  |_|  |_|\__,_|\___/|_|    \____/_|  \__,_| \_/\_/ |_|\___|_|   
-
-""")
-    wait_for_input()
-    while True:
-        menu_choices = [
-            inquirer.List("choice",
-                          message="\033[1m\033[4mMain Menu\033[0m",
-                          choices=[
-                              "Start a new game",
-                              "Load",
-                              "About",
-                              "Exit"
-                          ])
-        ]
-        choice = inquirer.prompt(menu_choices)["choice"]
-
-        if choice == "Start a new game":
-            start_new_game()
-        elif choice == "Load":
-            load_game()
-        elif choice == "About":
-            show_about()
-        elif choice == "Exit":
-            print("Exiting the game. Goodbye!")
-            break
-
-def get_valid_player_name():
-    while True:
-        player_name = input("Enter your character's name (up to 15 characters): ").strip()
-        if not player_name:
-            print("Please enter a non-empty name.")
-        elif len(player_name) > 15:
-            print("Name cannot exceed 15 characters.")
-        else:
-            return player_name
-
-def start_new_game():
-    player_name = get_valid_player_name()
     selected_race, selected_class = select_character()
     starting_gear = select_starting_gear(selected_class)
 
-    player = Player(player_name, selected_race, selected_class, starting_gear)
+    player = Player(selected_race, selected_class, starting_gear)
 
     game = Game()
     game.player = player  # Assign the player object to the game
     game.main_menu()
-
-def load_game():
-    if os.path.exists('save_game.pkl'):
-        try:
-            with open('save_game.pkl', 'rb') as f:
-                save_data = pickle.load(f)
-                player = save_data['player']
-                current_position = save_data['current_position']
-                corridor_dungeon = save_data['corridor_dungeon']
-                opened_treasure_chests = save_data['opened_treasure_chests']
-                current_difficulty = save_data['current_difficulty']
-                game = Game()
-                game.player = player
-                game.current_position = current_position
-                game.corridor_dungeon = corridor_dungeon
-                game.opened_treasure_chests = opened_treasure_chests
-                game.current_difficulty = current_difficulty
-                print("Game loaded successfully!")
-                # Resume the game from the loaded state
-                game.main_menu()  # or any other appropriate function to resume the game
-                return game  # Return the loaded game instance
-        except Exception as e:
-            print(f"Error occurred while loading the game: {str(e)}")
-            return None
-    else:
-        print("No saved game found.")
-        return None
-
-def show_about():
-    # Display information about the game
-    print("This is a text-based adventure game.")
-    print("Developed by FrQise.")
-    print("Version : Very pas finished")
-    wait_for_input()
 
 if __name__ == "__main__":
     main()

@@ -1,2 +1,5 @@
 notes.md
 test.py
+__pycache__
+compare.py
+save_game.pkl
