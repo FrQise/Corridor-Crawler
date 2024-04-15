@@ -35,11 +35,11 @@ class CorridorDungeon:
 
     def generate_event(self):
         event_probabilities = {
-            CorridorEventType.ENEMY_ENCOUNTER.value: 2,  # 10% chance for enemy encounter
-            CorridorEventType.TREASURE_CHEST.value: 0.05,   # 5% chance for treasure chest
+            CorridorEventType.ENEMY_ENCOUNTER.value: 0.1,  # 10% chance for enemy encounter
+            CorridorEventType.TREASURE_CHEST.value: 0.1,   # 5% chance for treasure chest
             CorridorEventType.TRAP.value: 0.1,             # 10% chance for trap
             CorridorEventType.EMPTY_CORRIDOR.value: 0.6,   # 60% chance for empty corridor
-            CorridorEventType.GOD_ALTAR.value: 0.15        # 15% chance for god altar
+            CorridorEventType.GOD_ALTAR.value: 1           # 15% chance for god altar
             # Adjust the probabilities as needed
         }
         
@@ -415,10 +415,8 @@ def god_altar(game, player, altar_description):
         if betray_answer:
             print(f"\nYou decided to betray {current_god}.")
             player.stats.pop('God')
-            game.event_resolved = True  # Set the flag to indicate that the event has been resolved
         else:
             print("\nYou decided to remain loyal to your current god.")
-            game.event_resolved = True  # Set the flag to indicate that the event has been resolved
             wait_for_input()
             return
     
@@ -436,11 +434,9 @@ def god_altar(game, player, altar_description):
         # Apply buffs to the player based on the selected god
         for stat, value in selected_god.buffs.items():
             player.stats[stat] += value
-        player.stats['God'] = selected_god.name
-        game.event_resolved = True  # Set the flag to indicate that the event has been resolved
+        player.god = selected_god.name
     else:
         print("\nYou decided not to worship any god at this time.")
-        game.event_resolved = True  # Set the flag to indicate that the event has been resolved
 
     wait_for_input()
 
@@ -632,7 +628,7 @@ class Game:
             'corridor_dungeon': self.corridor_dungeon,
             'opened_treasure_chests': self.opened_treasure_chests,
             'current_difficulty': self.current_difficulty,
-            'event_resolved': self.event_resolved 
+            'event_resolved': self.event_resolved,
         }
         try:
             with open('save_game.pkl', 'wb') as f:
@@ -666,12 +662,6 @@ class Game:
 
             # Skip handling the event if it has already been resolved
             if not self.event_resolved:
-                print("\nCurrent Corridor Event:")
-                print(current_event.description)
-                print("Current position :", self.current_position)
-                print("Current floor", self.current_difficulty)
-                check_room(self.player)
-
                 if current_event.description == CorridorEventType.TREASURE_CHEST.value and self.current_position not in self.opened_treasure_chests:
                     open_treasure_chest(self.player)
                     self.opened_treasure_chests.append(self.current_position)
@@ -682,12 +672,10 @@ class Game:
             else:
                 # Reset the flag and skip handling the event
                 self.event_resolved = False
-                print("\nCurrent Corridor Event:")
-                print(current_event.description)
-                print("Current position :", self.current_position)
-                print("Current floor", self.current_difficulty)
-                check_room(self.player)
-
+            print(current_event.description)
+            print("Current position :", self.current_position)
+            print("Current floor", self.current_difficulty)
+            check_room(self.player)
             # Player options
             questions = [
                 inquirer.List("action",
