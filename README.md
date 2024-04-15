@@ -56,6 +56,9 @@
     - Add special attacks / magic to each monsters
     - Create bosses (link them to their biome maybe ? Special bosses for special events ?)
 
+## Python version
+Python 3.11.9
+
 ## Feedback and Contribution
 
 We welcome feedback from players and contributions from the community to help improve the game. If you have suggestions, bug reports, or would like to contribute to the project, please feel free to submit an issue or pull request on GitHub. Your input and contributions are highly appreciated and will help make the game better for everyone.
