@@ -10,6 +10,7 @@ from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue
 from itertools import zip_longest
 from pantheon import gods
 from bestiary import Monster
+import spells
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -78,6 +79,9 @@ class Player:
         self.god = None
         self.equipment = Equipment()
         self.inventory = []
+        self.spells = [] # Initialize an empty list to store spells
+        self.max_hp = self.calculate_hp
+        self.max_mp = self.calculate_mp
         self.apply_race_modifiers()
         if char_class:
             char_class.apply_class_modifiers(self.stats)
@@ -87,6 +91,9 @@ class Player:
         # Calculate HP after initializing stats
         self.stats["HP"] = self.calculate_hp()
         self.stats["MP"] = self.calculate_mp()
+
+    def learn_spell(self, spell):
+        self.spells.append(spell)
 
     def equip_starting_gear(self, starting_gear):
         for slot, item_name in starting_gear.items():
@@ -267,6 +274,9 @@ def view_equipment_details(player):
 
 def check_inventory(game, player):
     game.event_resolved = True
+    for spell in spells.all_spells:
+        if spell.name == "Flame Burst":
+            player.learn_spell(spell)
     print("\nPlayer Inventory:")
     for i, item in enumerate(player.inventory):
         print(f"{i + 1}. {item.name}")
@@ -566,9 +576,95 @@ def attack(player, enemy):
                 print("You have been defeated!")
                 # Add any other game over logic here
 
-def use_spells(player, enemy):
-    # Implement spell usage logic here
-    pass
+def check_spells(game, player):
+    game.event_resolved = True
+    print("\nPlayer Spells:")
+    for i, spell in enumerate(player.spells):
+        print(f"{i + 1}. {spell.name}")
+
+    questions = [
+        inquirer.List("spell_action",
+                      message="[?] Spell Options:",
+                      choices=["Use Spell", "Inspect Spell", "Back"])
+    ]
+    answer = inquirer.prompt(questions)["spell_action"]
+
+    if answer == "Use Spell":
+        use_spell(player)
+    elif answer == "Inspect Spell":
+        inspect_spell(player)
+    elif answer == "Back":
+        return  # Go back to previous menu
+
+def inspect_spell(player):
+    choice = input("\nEnter the number of the spell you want to inspect (or 'b' to go back): ").strip().lower()
+
+    if choice == 'b':
+        return
+    elif choice.isdigit():
+        spell_index = int(choice) - 1
+
+        if 0 <= spell_index < len(player.spells):
+            spell = player.spells[spell_index]
+            print(f"\nName: {spell.name}")
+            print(f"Description: {spell.description}")
+            print("Damage Type:", spell.damage_type)
+            print("Damage:", spell.damage)
+            print("Category:", spell.category)
+            if spell.player_buff:
+                print("Player Buffs:")
+                for stat, value in spell.player_buff.items():
+                    print(f"{stat}: {value}")
+            if spell.monster_debuff:
+                print("Monster Debuffs:")
+                for stat, value in spell.monster_debuff.items():
+                    print(f"{stat}: {value}")
+            if spell.extra_effect:
+                print("Extra Effect:", spell.extra_effect)
+            wait_for_input()
+        else:
+            print("\nInvalid spell index. Please enter a valid number.")
+    else:
+        print("\nInvalid input. Please enter a number or 'b' to go back.")
+
+def use_spell(player):
+    choice = input("\nEnter the number of the spell you want to use (or 'b' to go back): ").strip().lower()
+
+    if choice == 'b':
+        return
+    elif choice.isdigit():
+        spell_index = int(choice) - 1
+
+        if 0 <= spell_index < len(player.spells):
+            spell = player.spells[spell_index]
+            if spell.spell_type == "Attack" or spell.spell_type == "Debuff":
+                print("\nYou can't use this spell outside of combat.")
+                wait_for_input()
+                return
+            elif spell.spell_type == "Buff":
+                # Apply the buff to the player's stats
+                apply_spell_buff(player, spell)
+            elif spell.spell_type == "Special":
+                # Implement logic for special spells
+                print("\nThis spell has a special effect. Implement logic for it here.")
+        else:
+            print("\nInvalid spell index. Please enter a valid number.")
+    else:
+        print("\nInvalid input. Please enter a number or 'b' to go back.")
+
+def apply_spell_buff(player, spell):
+    if spell.player_buff:
+        for stat, value in spell.player_buff.items():
+            if stat in player.stats:
+                player.stats[stat] += value
+            else:
+                # Add the stat to the player's stats if it doesn't exist
+                player.stats[stat] = value
+        print(f"\nApplied {spell.name}.")
+        wait_for_input()
+    else:
+        print("\nThis spell does not provide any buff.")
+        wait_for_input()
 
 def use_items(player):
     # Implement item usage logic here
@@ -634,7 +730,6 @@ class Game:
             with open('save_game.pkl', 'wb') as f:
                 pickle.dump(save_data, f)
             print("Game saved successfully!")
-            print("OUH")
             wait_for_input()
             self.pop_state()
         except Exception as e:
@@ -680,7 +775,7 @@ class Game:
             questions = [
                 inquirer.List("action",
                               message="[?] What would you like to do?",
-                              choices=["Move forward", "Check Stats", "Check Equipment", "Check Inventory", "Save"])]
+                              choices=["Move forward", "Check Stats", "Check Equipment", "Check Inventory", "Spells", "Save"])]
             answer = inquirer.prompt(questions)["action"]
 
             if answer == "Move forward":
@@ -704,6 +799,9 @@ class Game:
             elif answer == "Check Inventory":
                 check_inventory(self, self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
+            elif answer == "Spells":
+                check_spells(self, self.player)  # Show the sub-menu for spells
+                self.pop_state() 
             elif answer == "Save":
                 self.save_game(self)  # Call the save_game method of the Game instance
 
