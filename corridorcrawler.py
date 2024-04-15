@@ -182,7 +182,8 @@ def check_room(player):
     print(f"\033[94mMP: {player.stats['MP']}\033[0m\n")  # Blue color for MP
     print(f"Holding: {player.get_current_weapon().name if player.get_current_weapon() else 'None'}")
 
-def check_stats(player):
+def check_stats(game, player):
+    game.event_resolved = True
     print("\n\033[1m\033[4mPlayer Stats:\033[0m")
 
     # Exclude HP and MP stats from printing
@@ -219,7 +220,8 @@ def check_stats(player):
     print(f"Armor Proficiencies: {', '.join(player.char_class.armor_proficiencies)}")
     wait_for_input()
 
-def check_equipment(player):
+def check_equipment(game, player):
+    game.event_resolved = True
     print("\nPlayer Equipment:")
     equipment_slots = player.equipment.slots
     for slot, item in equipment_slots.items():
@@ -263,7 +265,8 @@ def view_equipment_details(player):
 
         print("\nInvalid item selection.")
 
-def check_inventory(player):
+def check_inventory(game, player):
+    game.event_resolved = True
     print("\nPlayer Inventory:")
     for i, item in enumerate(player.inventory):
         print(f"{i + 1}. {item.name}")
@@ -386,7 +389,7 @@ def open_treasure_chest(player):
         wait_for_input()
 
 
-def god_altar(player, altar_description):
+def god_altar(game, player, altar_description):
     print("\n\nYou just found the Altar of", end=" ")
 
     # Randomly select a god
@@ -399,6 +402,7 @@ def god_altar(player, altar_description):
     if current_god:
         if current_god == selected_god.name:
             print("This is the altar of your current god.")
+            game.event_resolved = True  # Set the flag to indicate that the event has been resolved
             wait_for_input()
             return
 
@@ -411,8 +415,10 @@ def god_altar(player, altar_description):
         if betray_answer:
             print(f"\nYou decided to betray {current_god}.")
             player.stats.pop('God')
+            game.event_resolved = True  # Set the flag to indicate that the event has been resolved
         else:
             print("\nYou decided to remain loyal to your current god.")
+            game.event_resolved = True  # Set the flag to indicate that the event has been resolved
             wait_for_input()
             return
     
@@ -431,8 +437,10 @@ def god_altar(player, altar_description):
         for stat, value in selected_god.buffs.items():
             player.stats[stat] += value
         player.stats['God'] = selected_god.name
+        game.event_resolved = True  # Set the flag to indicate that the event has been resolved
     else:
         print("\nYou decided not to worship any god at this time.")
+        game.event_resolved = True  # Set the flag to indicate that the event has been resolved
 
     wait_for_input()
 
@@ -448,7 +456,7 @@ def handle_hp_reduction(player, hp_reduction_amount):
     player.stats['HP'] -= hp_reduction_amount
     check_player_hp(player)
 
-def handle_enemy_encounter(player, current_difficulty):
+def handle_enemy_encounter(game, player, current_difficulty):
     # Dynamically import the bestiary module
     bestiary = importlib.import_module('bestiary')
 
@@ -519,6 +527,7 @@ def handle_enemy_encounter(player, current_difficulty):
         # Check if the enemy is defeated
         if enemy.stats['HP'] <= 0:
             print(f"\n\033[1m{enemy.name} has been defeated!\033[0m\n")
+            game.event_resolved = True  # Set the flag to indicate that the event has been resolved
             break  # Exit the combat loop if the enemy is defeated
 
         # Check if the player is defeated after taking action
@@ -599,8 +608,6 @@ def enemy_action(player, enemy):
         
         player.stats['HP'] -= damage_dealt
 
-
-
 class GameState:
     def __init__(self, menu_function):
         self.menu_function = menu_function
@@ -614,15 +621,18 @@ class Game:
         self.states = []
         self.opened_treasure_chests = []  # Track opened treasure chests
         self.current_difficulty = 1 # Initialize the current difficulty level
+        self.event_resolved = False # Flag to track wheteher the current event has been resolved
 
-    def save_game(self):
+    def save_game(game, self):
+        game.event_resolved = True
         print("\nSaving the game...")
         save_data = {
             'player': self.player,
             'current_position': self.current_position,
             'corridor_dungeon': self.corridor_dungeon,
             'opened_treasure_chests': self.opened_treasure_chests,
-            'current_difficulty': self.current_difficulty
+            'current_difficulty': self.current_difficulty,
+            'event_resolved': self.event_resolved 
         }
         try:
             with open('save_game.pkl', 'wb') as f:
@@ -653,20 +663,30 @@ class Game:
         self.push_state(GameState(self.main_menu))
         while self.current_position < self.corridor_dungeon.corridor_length:
             current_event = self.current_event()
-            print("\nCurrent Corridor Event:")
-            print(current_event.description)
-            print("Current position :", self.current_position)
-            print("Current floor", self.current_difficulty)
-            check_room(self.player)
 
-            # Handle treasure room event only if it hasn't been opened yet
-            if current_event.description == CorridorEventType.TREASURE_CHEST.value and self.current_position not in self.opened_treasure_chests:
-                open_treasure_chest(self.player)
-                self.opened_treasure_chests.append(self.current_position)
-            elif current_event.description == CorridorEventType.GOD_ALTAR.value:
-                god_altar(self.player, self.current_event().description)
-            elif current_event.description == CorridorEventType.ENEMY_ENCOUNTER.value:
-                handle_enemy_encounter(self.player, self.current_difficulty)
+            # Skip handling the event if it has already been resolved
+            if not self.event_resolved:
+                print("\nCurrent Corridor Event:")
+                print(current_event.description)
+                print("Current position :", self.current_position)
+                print("Current floor", self.current_difficulty)
+                check_room(self.player)
+
+                if current_event.description == CorridorEventType.TREASURE_CHEST.value and self.current_position not in self.opened_treasure_chests:
+                    open_treasure_chest(self.player)
+                    self.opened_treasure_chests.append(self.current_position)
+                elif current_event.description == CorridorEventType.GOD_ALTAR.value:
+                    god_altar(self, self.player, self.current_event().description)
+                elif current_event.description == CorridorEventType.ENEMY_ENCOUNTER.value:
+                    handle_enemy_encounter(self, self.player, self.current_difficulty)
+            else:
+                # Reset the flag and skip handling the event
+                self.event_resolved = False
+                print("\nCurrent Corridor Event:")
+                print(current_event.description)
+                print("Current position :", self.current_position)
+                print("Current floor", self.current_difficulty)
+                check_room(self.player)
 
             # Player options
             questions = [
@@ -689,16 +709,15 @@ class Game:
                 else:
                     self.current_position = move_forward(self.current_position)  # Update player's position
             elif answer == "Check Stats":
-                check_stats(self.player)
-                self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
+                check_stats(self, self.player)
             elif answer == "Check Equipment":
-                check_equipment(self.player)
+                check_equipment(self, self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
             elif answer == "Check Inventory":
-                check_inventory(self.player)
+                check_inventory(self, self.player)
                 self.pop_state()  # After finishing the submenu, pop the state to return to the previous state
             elif answer == "Save":
-                self.save_game()  # Call the save_game method of the Game instance
+                self.save_game(self)  # Call the save_game method of the Game instance
 
             # Check if the game ends
             if self.current_position == self.corridor_dungeon.corridor_length:
@@ -834,12 +853,14 @@ def load_game():
                 corridor_dungeon = save_data['corridor_dungeon']
                 opened_treasure_chests = save_data['opened_treasure_chests']
                 current_difficulty = save_data['current_difficulty']
+                event_resolved = save_data['event_resolved']
                 game = Game()
                 game.player = player
                 game.current_position = current_position
                 game.corridor_dungeon = corridor_dungeon
                 game.opened_treasure_chests = opened_treasure_chests
                 game.current_difficulty = current_difficulty
+                game.event_resolved = event_resolved
                 print("Game loaded successfully!")
                 # Resume the game from the loaded state
                 game.main_menu()  # or any other appropriate function to resume the game
