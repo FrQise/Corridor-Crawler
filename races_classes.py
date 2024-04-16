@@ -18,6 +18,8 @@ elf = Race("Elf", "Graceful and attuned to nature", dexterity=2, intelligence=1,
 
 dwarf = Race("Dwarf", "Strong and resilient", strength=2, constitution=2, wisdom=1)
 
+goblin = Race("Goblin", "Small little ugly green guy", strength=-2, constitution=-1, dexterity=3)
+
 class Class:
     def __init__(self, name, description, stats=None, weapon_proficiencies=None, armor_proficiencies=None, spell_categories=None):
         self.name = name

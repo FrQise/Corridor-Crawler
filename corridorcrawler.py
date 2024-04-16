@@ -6,11 +6,12 @@ import sys
 import pickle
 import os
 from item_definitions import Weapon, Armor, weapons, armor
-from races_classes import Race, Class, human, elf, dwarf, fighter, wizard, rogue, cleric, sorcerer
+from races_classes import Race, Class, human, elf, dwarf, goblin, fighter, wizard, rogue, cleric, sorcerer
 from itertools import zip_longest
 from pantheon import gods
 from bestiary import Monster
 import spells
+from spells import Spell
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -36,7 +37,7 @@ class CorridorDungeon:
 
     def generate_event(self):
         event_probabilities = {
-            CorridorEventType.ENEMY_ENCOUNTER.value: 0.1,  # 10% chance for enemy encounter
+            CorridorEventType.ENEMY_ENCOUNTER.value: 2,  # 10% chance for enemy encounter
             CorridorEventType.TREASURE_CHEST.value: 0.1,   # 5% chance for treasure chest
             CorridorEventType.TRAP.value: 0.1,             # 10% chance for trap
             CorridorEventType.EMPTY_CORRIDOR.value: 0.6,   # 60% chance for empty corridor
@@ -277,7 +278,7 @@ def view_equipment_details(player):
 def check_inventory(game, player):
     game.event_resolved = True
     for spell in spells.all_spells:
-        if spell.name == "Healing Light":
+        if spell.name == "Healing Light" or "Flame Burst" or "Weakness Curse":
             player.learn_spell(spell)
     print("\nPlayer Inventory:")
     for i, item in enumerate(player.inventory):
@@ -539,7 +540,7 @@ def handle_enemy_encounter(game, player, current_difficulty):
                 attack(player, enemy)
             elif action == "Spells":
                 # Implement magic usage logic
-                use_spells(player, enemy)
+                use_spell_in_combat(player, enemy)
             elif action == "Use Items":
                 # Implement item usage logic
                 use_items(player)
@@ -580,8 +581,11 @@ def attack(player, enemy):
         
         print(f"You attacked the {enemy.name} with {equipped_weapon.name} and dealt {damage} damage!\n")
 
-    else:
-        print("You have no weapon equipped!")
+    else: # No-weapon equipped attack = barehand attack
+        attack_power = player.stats['Strength']
+        damage = max(0, attack_power - enemy.stats.get('Defense', 0))
+        enemy.stats['HP'] -= damage
+        print(f"You attacked the {enemy.name} with your bare hands and dealt {damage} damage!\n")
     
     # Check if the enemy is still alive before allowing it to attack
     if enemy.stats.get('HP', 0) > 0:
@@ -591,6 +595,99 @@ def attack(player, enemy):
             if player.stats['HP'] <= 0:
                 print("You have been defeated!")
                 # Add any other game over logic here
+
+def use_spell_in_combat(player, enemy):
+    # Prompt the player to choose a spell
+    questions = [
+        inquirer.List("spell_choice",
+                      message="[?] Enter the spell you want to use:",
+                      choices=[spell.name for spell in player.spells] + ['Back']
+        )
+    ]
+    answer = inquirer.prompt(questions)["spell_choice"]
+
+    # Check if the player selects a spell or wants to go back
+    if answer != 'Back':
+        selected_spell = next((spell for spell in player.spells if spell.name == answer), None)
+        if selected_spell is not None:
+            # Perform actions based on the selected spell
+            if selected_spell.spell_type == "Attack" or selected_spell.spell_type == "Debuff":
+                calculate_spell_damage_and_attack_enemy(player, enemy, selected_spell)
+            elif selected_spell.spell_type == "Buff":
+                apply_spell_buff(player, selected_spell)
+            elif selected_spell.spell_type == "Special":
+                handle_special_spell(player, enemy, selected_spell)
+        else:
+            print("\nInvalid spell selection.")
+    else:
+        print("\nGoing back to combat menu.")
+
+def calculate_spell_damage_and_attack_enemy(player, enemy, spell):
+    if spell.spell_type == "Debuff":
+        apply_spell_debuff_to_enemy(enemy, spell)
+    else:
+        # Calculate damage based on the spell's damage
+        damage = spell.damage
+        # May add additional logic here to modify damage based on player's stats or other factors
+        # For example, if the spell's damage type matches the enemy's weakness, could increase damage
+
+        # Perform the attack on the enemy
+        enemy.stats['HP'] -= damage
+        print(f"You cast {spell.name} and dealt {damage} damage to the {enemy.name}!\n")
+
+def apply_combat_spell_buff(player, spell):
+    if spell.player_buff:
+        if spell.extra_effect == "Healing" and player.stats['HP'] >= player.max_hp:
+            verify_stats(player)
+            print("\nYou're already at full health.")
+            wait_for_input()
+            return
+
+        for stat, value in spell.player_buff.items():
+            if stat in player.stats:
+                player.stats[stat] += value
+            else:
+                # Add the stat to the player's stats if it doesn't exist
+                player.stats[stat] = value
+        verify_stats(player)
+        print(f"\nApplied {spell.name}.")
+        print_effects(spell)  # Pass the spell to print_effects
+        wait_for_input()
+    else:
+        print("\nThis spell does not provide any buff.")
+        wait_for_input()
+
+def print_effects(spell):
+    # Print the effects of the spell
+    if spell.player_buff:
+            for stat, value in spell.player_buff.items():
+                print(f"You gained {value} {stat}")
+    if spell.monster_debuff:
+        print("Monster Debuffs:")
+        for stat, value in spell.monster_debuff.items():
+            print(f"{stat}: {value}")
+
+def apply_spell_debuff_to_enemy(enemy, spell):
+    # Apply debuff to the enemy
+    if spell.monster_debuff:
+        for stat, value in spell.monster_debuff.items():
+            if stat in enemy.stats:
+                enemy.stats[stat] += value
+            else:
+                # Add the stat to the enemy's stats if it doesn't exist
+                enemy.stats[stat] = value
+        print(f"You cast {spell.name} and applied {value} {stat} to the {enemy.name}!\n")
+    else:
+        print("\nThis spell does not provide any debuff.")
+
+def handle_special_spell(player, enemy, spell):
+    # Implement logic for special spells
+    if spell.extra_effect == "Double Turn":
+        # Perform the special effect logic
+        print("You cast a spell with a special effect: Double Turn")
+        # Add logic here to allow the player to take two turns in combat or any other special effect
+    else:
+        print("\nThis spell has a special effect. Implement logic for it here.")
 
 def check_spells(game, player):
     game.event_resolved = True
@@ -845,7 +942,7 @@ def get_int_input(prompt):
             print("Invalid input. Please enter a number.")
 
 def select_character():
-    races = [human, elf, dwarf]
+    races = [human, elf, dwarf, goblin]
     classes = [fighter, wizard, rogue, cleric, sorcerer]
 
     # Select race

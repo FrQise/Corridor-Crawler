@@ -31,10 +31,14 @@ monster_debuff = {'defense': -2}  # Example: Decrease monster's defense
 
 # Define spells with player buffs and monster debuffs
 buff_spells = [
-    Spell("Strength of the Bear", "Grant the caster the strength of a bear.", None, damage=0, category="Buff", spell_type="Buff", player_buff=player_buff),
-    Spell("Weakness Curse", "Curse the enemy to weaken their defenses.", None, damage=0, category="Debuff", spell_type="Debuff", monster_debuff=monster_debuff),
+    Spell("Strength of the Bear", "Grant the caster the strength of a bear.", None, damage=0, category="Buff", spell_type="Buff", player_buff={'Strength': 10}),
     Spell("Healing Light", "Channel healing light to restore HP.", None, damage=0, category="Buff", spell_type="Buff", player_buff={'HP': 10}, extra_effect="Healing")
     # Add more buff/debuff spells...
+]
+
+debuff_spells = [
+Spell("Weakness Curse", "Curse the enemy to weaken their defenses.", None, damage=0, category="Debuff", spell_type="Debuff", monster_debuff={'Strength': -10}, extra_effect="Debuff")
+
 ]
 
 # Define spells with extra effects
@@ -44,4 +48,4 @@ extra_effect_spells = [
 ]
 
 # Combine all spells into one list
-all_spells = evocation_spells + invocation_spells + buff_spells + extra_effect_spells
+all_spells = evocation_spells + invocation_spells + buff_spells + extra_effect_spells + debuff_spells
