@@ -11,7 +11,6 @@ from itertools import zip_longest
 from pantheon import gods
 from bestiary import Monster
 import spells
-from spells import Spell
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -82,6 +81,7 @@ class Player:
         self.equipment = Equipment()
         self.inventory = []
         self.spells = [] # Initialize an empty list to store spells
+        self.active_buffs = []
         self.apply_race_modifiers()
         if char_class:
             char_class.apply_class_modifiers(self.stats)
@@ -189,6 +189,7 @@ def check_room(player):
     print(f"Race: {player.race.name} | Class: {player.char_class.name}\n")
     print(f"\033[91mHP: {player.stats['HP']}\033[0m")  # Red color for HP
     print(f"\033[94mMP: {player.stats['MP']}\033[0m\n")  # Blue color for MP
+    print(player.active_buffs)
     print(f"Holding: {player.get_current_weapon().name if player.get_current_weapon() else 'None'}")
 
 def check_stats(game, player):
@@ -501,8 +502,8 @@ def handle_enemy_encounter(game, player, current_difficulty):
         print("No enemies found for this encounter.")
         return
 
-    # Reset enemy's HP before the encounter
-    enemy.stats['HP'] = enemy.initial_hp
+    # Reset enemy's stats before the encounter
+    reset_enemy_stats(enemy)
     enemy.stats = enemy.initial_stats
 
     # Display initial enemy encounter
@@ -524,6 +525,9 @@ def handle_enemy_encounter(game, player, current_difficulty):
         # Display enemy HP before presenting battle options if enemy is alive
         if enemy.stats['HP'] > 0:
             print(f"{enemy.name} HP: {enemy.stats['HP']}\n")
+        print("Enemy Stats:")
+        for stat, value in enemy.stats.items():
+            print(f"{stat}: {value}")
 
         # Display combat options only if player's HP is above 0
         if player.stats['HP'] > 0:
@@ -703,7 +707,7 @@ def check_spells(game, player):
     answer = inquirer.prompt(questions)["spell_action"]
 
     if answer == "Use Spell":
-        use_spell(player)
+        use_spell(game, player)
     elif answer == "Inspect Spell":
         inspect_spell(player)
     elif answer == "Back":
@@ -740,7 +744,7 @@ def inspect_spell(player):
     else:
         print("\nInvalid input. Please enter a number or 'b' to go back.")
 
-def use_spell(player):
+def use_spell(game, player):
     choice = input("\nEnter the number of the spell you want to use (or 'b' to go back): ").strip().lower()
 
     if choice == 'b':
@@ -756,7 +760,7 @@ def use_spell(player):
                 return
             elif spell.spell_type == "Buff":
                 # Apply the buff to the player's stats
-                apply_spell_buff(player, spell)
+                apply_spell_buff(game, player, spell)
             elif spell.spell_type == "Special":
                 # Implement logic for special spells
                 print("\nThis spell has a special effect. Implement logic for it here.")
@@ -765,8 +769,15 @@ def use_spell(player):
     else:
         print("\nInvalid input. Please enter a number or 'b' to go back.")
 
-def apply_spell_buff(player, spell):
+def apply_spell_buff(game, player, spell):
     if spell.player_buff:
+        # Calculate the duration of the spell buff based on the player's current position
+        spell_duration = game.current_position + spell.duration
+        buff_info = {"spell": spell, "expiration": spell_duration, "start_position": game.current_position}
+        
+        # Add the buff information to the player's active_buffs list
+        player.active_buffs.append(buff_info)
+
         if spell.extra_effect == "Healing" and player.stats['HP'] >= player.max_hp:
             verify_stats(player)
             print("\nYou're already at full health.")
@@ -786,6 +797,7 @@ def apply_spell_buff(player, spell):
         print("\nThis spell does not provide any buff.")
         wait_for_input()
 
+
 def use_items(player):
     # Implement item usage logic here
     pass
@@ -798,6 +810,11 @@ def block(player, enemy):
     # Reduce player's HP by the enemy's damage
     player.stats['HP'] -= enemy_damage
     print(f"You blocked the {enemy.name}'s attack and received {enemy_damage} damage!")
+
+def reset_enemy_stats(enemy):
+    # Reset all enemy stats to their initial values
+    for stat, value in enemy.initial_stats.items():
+        enemy.stats[stat] = value
 
 def enemy_action(player, enemy):
     if hasattr(enemy, 'stats') and 'Damage' in enemy.stats:
@@ -814,7 +831,7 @@ def enemy_action(player, enemy):
                 # Calculate the damage reduction based on elemental resistance
                 damage_reduction_percentage = resistance / 100
                 damage_dealt -= int(damage_dealt * damage_reduction_percentage)
-                print(f"{enemy.name} attacks with {element} and deals {damage_dealt} damage!")
+                print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
         else:
             print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
         
@@ -869,6 +886,33 @@ class Game:
 
     def current_event(self):
         return self.corridor_dungeon.corridor[self.current_position]
+    
+    def revert_spell_buff(self, player, spell):
+        if spell.player_buff:
+            for stat, value in spell.player_buff.items():
+                if stat in player.stats:
+                    player.stats[stat] -= value
+
+    def remove_expired_buffs(self):
+        current_position = self.current_position
+        active_buffs = self.player.active_buffs
+    
+        # Create a list to store buffs that need to be removed
+        buffs_to_remove = []
+
+        # Iterate over active buffs and identify those that have expired
+        for buff_info in active_buffs:
+            duration = buff_info["spell"].duration
+            start_position = current_position - duration  # Calculate the start position based on the current position and duration
+            if start_position <= buff_info["start_position"]:
+                buffs_to_remove.append(buff_info)
+
+        # Remove expired buffs from the player's active_buffs list
+        for buff_info in buffs_to_remove:
+            self.revert_spell_buff(self.player, buff_info["spell"])
+            active_buffs.remove(buff_info)
+            print(f"Expired buff: {buff_info['spell'].name}")
+            wait_for_input()
 
     def main_menu(self):
         self.push_state(GameState(self.main_menu))
@@ -908,8 +952,10 @@ class Game:
                     self.player.stats["HP"] = self.player.calculate_hp()  # Reset player's HP
                     self.player.stats["MP"] = self.player.calculate_mp()  # Reset player's MP
                     self.current_position = 0  # Reset player's position to the start of the new corridor
+                    self.remove_expired_buffs()
                     wait_for_input()
                 else:
+                    self.remove_expired_buffs()
                     self.current_position = move_forward(self.current_position)  # Update player's position
             elif answer == "Check Stats":
                 verify_stats(self.player)

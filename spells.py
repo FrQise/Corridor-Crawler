@@ -1,5 +1,5 @@
 class Spell:
-    def __init__(self, name, description, damage_type, damage, category, spell_type, player_buff=None, monster_debuff=None, extra_effect=None):
+    def __init__(self, name, description, damage_type, damage, category, spell_type, duration=None, player_buff=None, monster_debuff=None, extra_effect=None):
         self.name = name
         self.description = description
         self.damage_type = damage_type
@@ -9,6 +9,7 @@ class Spell:
         self.player_buff = player_buff  # Dictionary to store player stat buffs
         self.monster_debuff = monster_debuff  # Dictionary to store monster stat debuffs
         self.extra_effect = extra_effect  # Extra effect of the spell
+        self.duration = duration # Define the duration of the spell in room
 
 # Define spells for each category
 evocation_spells = [
@@ -31,7 +32,7 @@ monster_debuff = {'defense': -2}  # Example: Decrease monster's defense
 
 # Define spells with player buffs and monster debuffs
 buff_spells = [
-    Spell("Strength of the Bear", "Grant the caster the strength of a bear.", None, damage=0, category="Buff", spell_type="Buff", player_buff={'Strength': 10}),
+    Spell("Strength of the Bear", "Grant the caster the strength of a bear.", None, damage=0, category="Buff", spell_type="Buff", duration=1, player_buff={'Strength': 10}),
     Spell("Healing Light", "Channel healing light to restore HP.", None, damage=0, category="Buff", spell_type="Buff", player_buff={'HP': 10}, extra_effect="Healing")
     # Add more buff/debuff spells...
 ]
