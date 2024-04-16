@@ -1,5 +1,7 @@
+from spells import Spell
+
 class Monster:
-    def __init__(self, name, stats, gear, loot_table, difficulty, description, floor_range):
+    def __init__(self, name, stats, gear, loot_table, difficulty, description, floor_range, spells=None, spell_probabilities=None, initial_stats=None):
         self.name = name
         self.stats = stats
         self.initial_stats = stats.copy()
@@ -9,6 +11,10 @@ class Monster:
         self.floor_range = floor_range
         self.description = description
         self.initial_hp = stats["HP"] #Initialize initial HP attribute
+        self.initial_stats = initial_stats
+        self.spells = spells if spells else [] # List of spells the monster can use
+        self.spell_probabilities = spell_probabilities if spell_probabilities else {}  # Probability for each spell
+
 
 # Define monsters and their attributes
 goblin_stats = {
@@ -28,7 +34,10 @@ goblin_gear = ["Rusty Sword", "Tattered Cloth Armor"]
 goblin_loot_table = ["Gold", "Health Potion", "Small Gem"]
 goblin_description = "Goblins are small, agile creatures known for their mischief and love of shiny objects. Despite their size, they can be formidable opponents in combat, relying on their speed and cunning to outmaneuver their foes."
 goblin_floor_range = (1,2)
-goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1, description=goblin_description, floor_range=goblin_floor_range)
+goblin_spells = ["Flame Burst"]
+goblin_spell_probabilities = {goblin_spells[0]: 0} 
+goblin_initial_stats = goblin_stats.copy() #Make a copy of the initial stats
+goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1, description=goblin_description, floor_range=goblin_floor_range, spells=goblin_spells, spell_probabilities=goblin_spell_probabilities, initial_stats=goblin_initial_stats)
 
 
 orc_stats = {

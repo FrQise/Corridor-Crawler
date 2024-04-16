@@ -504,7 +504,6 @@ def handle_enemy_encounter(game, player, current_difficulty):
 
     # Reset enemy's stats before the encounter
     reset_enemy_stats(enemy)
-    enemy.stats = enemy.initial_stats
 
     # Display initial enemy encounter
     print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
@@ -817,6 +816,18 @@ def reset_enemy_stats(enemy):
         enemy.stats[stat] = value
 
 def enemy_action(player, enemy):
+    # Check if the enemy can cast spells and has spells to cast
+    if hasattr(enemy, 'spells') and enemy.spells:
+        # Check if the enemy decides to cast a spell based on its spell probabilities
+        for spell in enemy.spells:
+            probability = enemy.spell_probabilities.get(spell, 0)  # Get the probability of casting the spell
+            if random.random() < probability:  # Roll a random number and check if it's less than the probability
+                # Perform the spell's action here
+                print(f"{enemy.name} casts {spell}!")
+                # You can implement the effect of the spell on the player here
+                break  # Exit the loop after casting one spell per turn
+
+    # If the enemy doesn't cast a spell, perform a regular attack
     if hasattr(enemy, 'stats') and 'Damage' in enemy.stats:
         damage_stat = enemy.stats['Damage']
         damage_modifier = random.uniform(0.8, 1.2)  # Random modifier between 80% to 120%
