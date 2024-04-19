@@ -912,6 +912,7 @@ class Game:
             'opened_treasure_chests': self.opened_treasure_chests,
             'current_difficulty': self.current_difficulty,
             'event_resolved': self.event_resolved,
+            'current_biome':self.current_biome,
         }
         try:
             with open('save_game.pkl', 'wb') as f:
@@ -1164,6 +1165,7 @@ def load_game():
                 opened_treasure_chests = save_data['opened_treasure_chests']
                 current_difficulty = save_data['current_difficulty']
                 event_resolved = save_data['event_resolved']
+                current_biome = save_data['current_biome']
                 game = Game()
                 game.player = player
                 game.current_position = current_position
@@ -1171,7 +1173,9 @@ def load_game():
                 game.opened_treasure_chests = opened_treasure_chests
                 game.current_difficulty = current_difficulty
                 game.event_resolved = event_resolved
+                game.current_biome = current_biome
                 print("Game loaded successfully!")
+                wait_for_input()
                 # Resume the game from the loaded state
                 game.main_menu()  # or any other appropriate function to resume the game
                 return game  # Return the loaded game instance
