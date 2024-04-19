@@ -10,6 +10,7 @@ from races_classes import Race, Class, human, elf, dwarf, goblin, fighter, wizar
 from itertools import zip_longest
 from pantheon import gods
 from monsters.bestiary import Monster
+from monsters.bestiary import import_monsters_from_biome
 import spells
 from spells import all_spells
 
@@ -489,18 +490,12 @@ def handle_hp_reduction(player, hp_reduction_amount):
     check_player_hp(player)
 
 def handle_enemy_encounter(game, player, current_difficulty):
-    monster_modules = ['Bosses','Castle','Cave','Desert','Dragon_Lair','Dungeon','Forest','Hell','Mage_Tower','Mountains','Mushroom','Specials','Swamp','Undead']
-
-
-    # Get all attributes from the bestiary module
-    all_monsters = []
-    for module_name in monster_modules:
-        module = importlib.import_module(f'monsters.{module_name}')
-        all_monsters.extend([getattr(module, attr) for attr in dir(module) if isinstance(getattr(module, attr), Monster)])
-
+    current_biome = game.current_biome
+    monsters_in_current_biome = import_monsters_from_biome(game)
+    
     # Filter enemies based on floor range and current position
     possible_enemies = [
-        enemy for enemy in all_monsters
+        enemy for enemy in monsters_in_current_biome
         if current_difficulty >= enemy.floor_range[0]
     ]
 
@@ -509,6 +504,7 @@ def handle_enemy_encounter(game, player, current_difficulty):
         enemy = random.choice(possible_enemies)
     else:
         # If no enemy matches the criteria, return without encounter
+        print(import_monsters_from_biome)
         print("No enemies found for this encounter.")
         return
 
