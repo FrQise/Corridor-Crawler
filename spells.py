@@ -16,6 +16,7 @@ evocation_spells = [
     Spell("Flame Burst", "Create a burst of flames that engulfs your enemies.", "Fire", damage=20, category="Evocation", spell_type="Attack"),
     Spell("Thunderclap", "Summon a deafening clap of thunder to stun foes.", "Thunder", damage=15, category="Evocation", spell_type="Attack"),
     Spell("Icy Blast", "Unleash a freezing blast of ice to freeze targets in their tracks.", "Ice", damage=25, category="Evocation", spell_type="Attack"),
+    Spell("Smelly feet", "The user of this ancient art rub their smelly feet on your nose", "Odor", damage=100, category="Evocation",spell_type="Attack")
     # Add more evocation spells...
 ]
 

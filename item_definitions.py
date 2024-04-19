@@ -70,7 +70,7 @@ weapons = [
     Weapon("Longsword", "A versatile weapon with reach and slicing power", slashing, one_handed_sword, "Right Hand", stats={"Attack": 5, "Strength": 2}),
     Weapon("Warhammer", "A heavy hammer for smashing through armor", bludgeoning, one_handed_sword, "Right Hand"),
     Weapon("Fire Staff", "A staff imbued with the power of fire", fire, staff, "Two-Handed", fire_elemental),
-    Weapon("Short Sword", "A short and basic sword", slashing, one_handed_sword, "Right Hand", stats={"Attack":5}),
+    Weapon("Short Sword", "A short and basic sword", slashing, one_handed_sword, "Right Hand", stats={"Attack":1000}),
     Armor("Basic Shield", "A basic shield", shield_armor, "Left Hand", stats={"Defense": 3}),
     # Add more weapons...
 ]

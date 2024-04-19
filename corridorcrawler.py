@@ -9,8 +9,9 @@ from item_definitions import Weapon, Armor, weapons, armor
 from races_classes import Race, Class, human, elf, dwarf, goblin, fighter, wizard, rogue, cleric, sorcerer
 from itertools import zip_longest
 from pantheon import gods
-from bestiary import Monster
+from monsters.bestiary import Monster
 import spells
+from spells import all_spells
 
 class CorridorEventType(Enum):
     ENEMY_ENCOUNTER = "Enemy Encounter"
@@ -36,7 +37,7 @@ class CorridorDungeon:
 
     def generate_event(self):
         event_probabilities = {
-            CorridorEventType.ENEMY_ENCOUNTER.value: 2,  # 10% chance for enemy encounter
+            CorridorEventType.ENEMY_ENCOUNTER.value: 100,  # 10% chance for enemy encounter
             CorridorEventType.TREASURE_CHEST.value: 0.1,   # 5% chance for treasure chest
             CorridorEventType.TRAP.value: 0.1,             # 10% chance for trap
             CorridorEventType.EMPTY_CORRIDOR.value: 0.6,   # 60% chance for empty corridor
@@ -87,6 +88,12 @@ class Player:
             char_class.apply_class_modifiers(self.stats)
         if starting_gear:
             self.equip_starting_gear(starting_gear)
+
+        ### START PLAYER FLAGS ###
+
+        xxx_spell_flag = False
+
+        ### END PLAYER FLAGS ###
 
         # Calculate HP after initializing stats
         self.stats["HP"] = self.calculate_hp()
@@ -482,11 +489,14 @@ def handle_hp_reduction(player, hp_reduction_amount):
     check_player_hp(player)
 
 def handle_enemy_encounter(game, player, current_difficulty):
-    # Dynamically import the bestiary module
-    bestiary = importlib.import_module('bestiary')
+    monster_modules = ['Bosses','Castle','Cave','Desert','Dragon_Lair','Dungeon','Forest','Hell','Mage_Tower','Mountains','Mushroom','Specials','Swamp','Undead']
+
 
     # Get all attributes from the bestiary module
-    all_monsters = [getattr(bestiary, attr) for attr in dir(bestiary) if isinstance(getattr(bestiary, attr), Monster)]
+    all_monsters = []
+    for module_name in monster_modules:
+        module = importlib.import_module(f'monsters.{module_name}')
+        all_monsters.extend([getattr(module, attr) for attr in dir(module) if isinstance(getattr(module, attr), Monster)])
 
     # Filter enemies based on floor range and current position
     possible_enemies = [
@@ -508,6 +518,7 @@ def handle_enemy_encounter(game, player, current_difficulty):
     # Display initial enemy encounter
     print(f"\n\033[1;33mYou encounter a {enemy.name}\033[0m")
     print("Prepare for battle!")
+    wait_for_input()
 
     # Combat loop
     while True:
@@ -524,9 +535,6 @@ def handle_enemy_encounter(game, player, current_difficulty):
         # Display enemy HP before presenting battle options if enemy is alive
         if enemy.stats['HP'] > 0:
             print(f"{enemy.name} HP: {enemy.stats['HP']}\n")
-        print("Enemy Stats:")
-        for stat, value in enemy.stats.items():
-            print(f"{stat}: {value}")
 
         # Display combat options only if player's HP is above 0
         if player.stats['HP'] > 0:
@@ -685,10 +693,10 @@ def apply_spell_debuff_to_enemy(enemy, spell):
 
 def handle_special_spell(player, enemy, spell):
     # Implement logic for special spells
-    if spell.extra_effect == "Double Turn":
+    if spell.extra_effect == "xxxx":
         # Perform the special effect logic
-        print("You cast a spell with a special effect: Double Turn")
-        # Add logic here to allow the player to take two turns in combat or any other special effect
+        print("You cast a spell with a special effect: xxxx")
+        player.xxx_spell_flag = True  # Set the double turn flag to True for the player
     else:
         print("\nThis spell has a special effect. Implement logic for it here.")
 
@@ -822,10 +830,14 @@ def enemy_action(player, enemy):
         for spell in enemy.spells:
             probability = enemy.spell_probabilities.get(spell, 0)  # Get the probability of casting the spell
             if random.random() < probability:  # Roll a random number and check if it's less than the probability
-                # Perform the spell's action here
-                print(f"{enemy.name} casts {spell}!")
-                # You can implement the effect of the spell on the player here
-                break  # Exit the loop after casting one spell per turn
+                # Find the spell object by its name
+                for spell_obj in all_spells:
+                    if spell_obj.name == spell:
+                        spell_damage = spell_obj.damage
+                        # Apply the spell's damage to the player
+                        apply_enemy_spell_damage(player, spell_damage, spell_obj.damage_type)
+                        print(f"{enemy.name} casts {spell} and deals {spell_damage} {spell_obj.damage_type} damage!")
+                        return  # Exit the function after casting the spell
 
     # If the enemy doesn't cast a spell, perform a regular attack
     if hasattr(enemy, 'stats') and 'Damage' in enemy.stats:
@@ -842,11 +854,16 @@ def enemy_action(player, enemy):
                 # Calculate the damage reduction based on elemental resistance
                 damage_reduction_percentage = resistance / 100
                 damage_dealt -= int(damage_dealt * damage_reduction_percentage)
-                print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
+                print(f"{enemy.name} attacks and deals {damage_dealt} {element} damage!")
         else:
             print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
         
         player.stats['HP'] -= damage_dealt
+
+
+def apply_enemy_spell_damage(player, spell_damage, damage_type):
+    # Apply the damage to the player based on the damage type
+    player.stats['HP'] -= spell_damage
 
 class GameState:
     def __init__(self, menu_function):
