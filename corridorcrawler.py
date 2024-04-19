@@ -865,6 +865,12 @@ def apply_enemy_spell_damage(player, spell_damage, damage_type):
     # Apply the damage to the player based on the damage type
     player.stats['HP'] -= spell_damage
 
+class Biome:
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+
+
 class GameState:
     def __init__(self, menu_function):
         self.menu_function = menu_function
@@ -879,6 +885,26 @@ class Game:
         self.opened_treasure_chests = []  # Track opened treasure chests
         self.current_difficulty = 1 # Initialize the current difficulty level
         self.event_resolved = False # Flag to track wheteher the current event has been resolved
+        self.biomes = [
+            Biome("Forest", "A dense forest with towering trees and lush vegetation."),
+            Biome("Cave", "A dark and mysterious underground cavern."),
+            Biome("Desert", "A vast expanse of sand dunes and scorching heat."),
+            Biome("Castle", "The corridor took the look of an old Castle, what may lurk inside those rock walls"),
+            Biome("Dragon Lair", "The corridor feel like a Dragon Lair"),
+            Biome("Dungeon", "The base corridor"),
+            Biome("Hell", "Brrrr Hell"),
+            Biome("Mage Tower", "A tower, with mages"),
+            Biome("Mountains", "M o u n t a i n s"),
+            Biome("Mushroom", "Fungaloid land"),
+            Biome("Swamp", "Schni schna schnappi"),
+            Biome("Undead", "It's ALIVE, ALIVE"),
+            # Add more biomes as needed
+        ]
+        self.current_biome = None # Initialize current biome 
+
+    def assign_random_biome(self):
+        # Assign a random biome to the current floor
+        self.current_biome = random.choice(self.biomes)
 
     def save_game(game, self):
         game.event_resolved = True
@@ -945,6 +971,8 @@ class Game:
     def main_menu(self):
         self.push_state(GameState(self.main_menu))
         while self.current_position < self.corridor_dungeon.corridor_length:
+            if self.current_position == 0 or self.current_position % 10 == 0:
+                self.assign_random_biome() # Assign a random biome when entering a new floor
             current_event = self.current_event()
 
             # Skip handling the event if it has already been resolved
@@ -959,6 +987,8 @@ class Game:
             else:
                 # Reset the flag and skip handling the event
                 self.event_resolved = False
+            print("Biome:", self.current_biome.name)
+            print("Description:", self.current_biome.description)
             print(current_event.description)
             print("Current position :", self.current_position)
             print("Current floor", self.current_difficulty)
