@@ -22,40 +22,40 @@
     [ ] Add new room events / (create special events ?)
 
 ### Look into achievements :
-    - Add basic achievements
-    - Add achievements to unlock new things : Races and Classes
+    [ ] Add basic achievements
+    [ ] Add achievements to unlock new things : Races and Classes
 
 ### Create gold system :
-    - Add gold loot from enemies
-    - Add the Merchant Event for the room events
-    - Define the current items sold by the merchant by the stage of the game
-    - Create specials merchants ?
+    [ ] Add gold loot from enemies
+    [ ] Add the Merchant Event for the room events
+    [ ] Define the current items sold by the merchant by the stage of the game
+    [ ] Create specials merchants ?
 
 ### Add pantheon and gods favour :
-    - Create a pantheon of gods with multiples upgrades possible, the more you please your god the more bonus you get
-    - Create a system of displeasing the player god and so getting malus
+    [ ] Create a pantheon of gods with multiples upgrades possible, the more you please your god the more bonus you get
+    [ ] Create a system of displeasing the player god and so getting malus
 
 ### Upgrade and add races :
-    - New races
-    - Add special capacity for each races
+    [ ] New races
+    [ ] Add special capacity for each races
 
 ### Upgrade and add new classes :
-    - New classes
-    - Skilltree for classes ?
+    [ ] New classes
+    [ ] Skilltree for classes ?
 
 ### Add more equipments and usable items :
-    - Add usable items (potions, scrolls, other ?)
-    - Add tons of equipments to fit each classes and each specializations, define stats items better
-    - Special items ? Special equipments ? (maybe from bosses loot ? Special room events ?)
+    [ ] Add usable items (potions, scrolls, other ?)
+    [ ] Add tons of equipments to fit each classes and each specializations, define stats items better
+    [ ] Special items ? Special equipments ? (maybe from bosses loot ? Special room events ?)
 
 ### Upgrade the magic system and add more magics / special techniques.
-    - Add an option that only show magic if the user CAN use magic / special techniques
-    - Look at magic categories and change / upgrade them
+    [ ] Add an option that only show magic if the user CAN use magic / special techniques
+    [ ] Look at magic categories and change / upgrade them
 
 ### Upgrade and add monsters in the bestiary
-    - New monsters
-    - Add special attacks / magic to each monsters
-    - Create bosses (link them to their biome maybe ? Special bosses for special events ?)
+    [x] New monsters
+    [x] Add special attacks / magic to each monsters
+    [ ] Create bosses (link them to their biome maybe ? Special bosses for special events ?)
 
 ## Python version
 Python 3.11.9
