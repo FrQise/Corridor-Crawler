@@ -96,6 +96,12 @@ class Player:
 
         ### END PLAYER FLAGS ###
 
+        ### START PLAYER COUNTER ###
+
+        self.killed_enemies_count = 0
+
+        ### END PLAYER COUNTER ###
+
         # Calculate HP after initializing stats
         self.stats["HP"] = self.calculate_hp()
         self.stats["MP"] = self.calculate_mp()
@@ -558,6 +564,7 @@ def handle_enemy_encounter(game, player, current_difficulty):
         # Check if the enemy is defeated
         if enemy.stats['HP'] <= 0:
             print(f"\n\033[1m{enemy.name} has been defeated!\033[0m\n")
+            player.killed_enemies_count += 1
             game.event_resolved = True  # Set the flag to indicate that the event has been resolved
             break  # Exit the combat loop if the enemy is defeated
 

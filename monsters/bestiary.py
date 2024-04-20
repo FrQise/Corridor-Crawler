@@ -1,13 +1,12 @@
 from spells import Spell
 import importlib.util
 from os.path import dirname, basename, isfile, join
-import glob
 
 def import_monsters_from_biome(game):
     monsters = []
     current_biome = game.current_biome
     current_difficulty = game.current_difficulty
-    # print("Current biome from monster.py :", current_biome, "current difficulty from monsters.py:", current_difficulty)
+    # print("Current biome from monster.py :", current_biome, "current difficulty from monsters.py:", current_difficulty) # Debug print statement
     
     if current_biome is not None:
         biome_module_name = current_biome.name.lower().replace(" ", "_") + ".py"
