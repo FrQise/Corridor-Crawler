@@ -9,16 +9,17 @@
 ## To do-list :
 
 ### Upgrade the combat system :
-    - Add the possibility for ennemies to use magic / special attacks
-    - Add the magic/item usage for the player in combat
-    - Add the option to equip/unequip gear at the cost of 1 turn
+    [x] Add the possibility for ennemies to use magic / special attacks
+    [x] Add magic usage for the player in combat
+    [ ] Add item usage for the player in combat
+    [ ] Add the option to equip/unequip gear at the cost of 1 turn
 
 ### Upgrade the corridor generator :
-    - Look into having multiples floor with a "floor boss" at the end of each floor. 
-    - Add different biomes for each floors and create alternatives floor
-    - Add "special" floors with maybe portals that can get you to them ? Maybe some gods favour can be used to access some special floors too. (They can be only 1 room long if needed, maybe to get some bonus / treasures ?)
-    - Find a way to make each room event a probability to happen, maybe in function of the wanted rarity of the event ?
-    - Add new room events / (create special events ?)
+    [ ] Look into having multiples floor with a "floor boss" at the end of each floor. 
+    [x] Add different biomes for each floors and create alternatives floor
+    [ ] Add "special" floors with maybe portals that can get you to them ? Maybe some gods favour can be used to access some special floors too. (They can be only 1 room long if needed, maybe to get some bonus / treasures ?)
+    [x] Find a way to make each room event a probability to happen, maybe in function of the wanted rarity of the event ?
+    [ ] Add new room events / (create special events ?)
 
 ### Look into achievements :
     - Add basic achievements
