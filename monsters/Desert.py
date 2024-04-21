@@ -1,32 +1,10 @@
 from monsters.bestiary import Monster
 
-quicksand_quaggan_stats = {
-    "HP": 200,  # Define HP attribute for Quicksand Quaggan
-    "Damage": 60,  # Define damage attribute for Quicksand Quaggan
-    "Defense": 25,  # Define Defense stat vs attack stat
-    "Magic Defense": 35,  # Define magic defense vs spells
-    "Strength": 20,
-    "Dexterity": 30,
-    "Constitution": 25,
-    "Intelligence": 20,
-    "Wisdom": 25,
-    "Charisma": 20,
-    "Element": "Water"  # Define elemental attribute of the Quicksand Quaggan's attack
-}
-quicksand_quaggan_gear = ["Suction Cup Tentacles", "Mud-covered Armor"]
-quicksand_quaggan_loot_table = ["Gold", "Silt Gem", "Amphibious Boots"]
-quicksand_quaggan_description = "Quicksand Quaggans are amphibious creatures that dwell in the underground rivers and lakes of the cave. They are skilled swimmers and hunters, using their slimy bodies and powerful suction cup tentacles to ensnare their prey. Though slow-moving on land, they are swift and agile in the water."
-quicksand_quaggan_floor_range = (80, 150)
-quicksand_quaggan_spells = []
-quicksand_quaggan_spell_probabilities = {}
-quicksand_quaggan_initial_stats = quicksand_quaggan_stats.copy() # Make a copy of the initial stats
-quicksand_quaggan = Monster("Quicksand Quaggan", quicksand_quaggan_stats, quicksand_quaggan_gear, quicksand_quaggan_loot_table, difficulty=80, description=quicksand_quaggan_description, floor_range=quicksand_quaggan_floor_range)
-
-sand_wyrm_stats = {
-    "HP": 600,
-    "Damage": 90,
-    "Defense": 50,
-    "Magic Defense": 40,
+dust_wyrm_stats = {
+    "HP": 400,
+    "Damage": 70,
+    "Defense": 40,
+    "Magic Defense": 50,
     "Strength": 0,
     "Dexterity": 0,
     "Constitution": 0,
@@ -35,14 +13,14 @@ sand_wyrm_stats = {
     "Charisma": 0,
     "Element": "Earth"
 }
-sand_wyrm_gear = ["Razor Scales", "Sandstorm Armor"]
-sand_wyrm_loot_table = ["Gold", "Wyrm Scale", "Ancient Relic"]
-sand_wyrm_description = "Sand Wyrms are colossal serpentine creatures that burrow beneath the desert sands. They can strike with lightning speed, swallowing their prey whole with their razor-sharp jaws. Legends speak of ancient treasures hidden within their lairs, attracting adventurers seeking fortune and glory."
-sand_wyrm_floor_range = (1,5)
-sand_wyrm_spells = []
-sand_wyrm_spell_probabilities = {}
-sand_wyrm_initial_stats = sand_wyrm_stats.copy()
-sand_wyrm = Monster("Sand Wyrm", sand_wyrm_stats, sand_wyrm_gear, sand_wyrm_loot_table, difficulty=200, description=sand_wyrm_description, floor_range=sand_wyrm_floor_range, spells=sand_wyrm_spells, spell_probabilities=sand_wyrm_spell_probabilities, initial_stats=sand_wyrm_initial_stats)
+dust_wyrm_gear = ["Razor Scales", "Sandstorm Armor"]
+dust_wyrm_loot_table = {"Gold": (1, 10), "Longsword": (1, 1)}
+dust_wyrm_description = "Dust Wyrms are colossal serpentine creatures that burrow beneath the desert sands. They can strike with lightning speed, swallowing their prey whole with their razor-sharp jaws. Legends speak of ancient treasures hidden within their lairs, attracting adventurers seeking fortune and glory."
+dust_wyrm_floor_range = (1, 5)
+dust_wyrm_spells = []
+dust_wyrm_spell_probabilities = {}
+dust_wyrm_initial_stats = dust_wyrm_stats.copy()
+dust_wyrm = Monster("Dust Wyrm", dust_wyrm_stats, dust_wyrm_gear, dust_wyrm_loot_table, difficulty=3, description=dust_wyrm_description, floor_range=dust_wyrm_floor_range, spells=dust_wyrm_spells, spell_probabilities=dust_wyrm_spell_probabilities, initial_stats=dust_wyrm_initial_stats)
 
 mirage_viper_stats = {
     "HP": 400,
@@ -58,13 +36,13 @@ mirage_viper_stats = {
     "Element": "Poison"
 }
 mirage_viper_gear = ["Venomous Fangs", "Dazzling Scales"]
-mirage_viper_loot_table = ["Gold", "Viper Fang", "Enigmatic Jewel"]
+mirage_viper_loot_table = {"Gold": (1, 10), "Longsword": (1, 1)}
 mirage_viper_description = "Mirage Vipers are deadly serpents that blend seamlessly into the shifting sands of the desert. Their venomous bite can induce hallucinations, leaving their victims disoriented and vulnerable. Travelers beware, for their deadly embrace can spell certain doom."
-mirage_viper_floor_range = (150, 250)
+mirage_viper_floor_range = (2, 5)
 mirage_viper_spells = []
 mirage_viper_spell_probabilities = {}
 mirage_viper_initial_stats = mirage_viper_stats.copy()
-mirage_viper = Monster("Mirage Viper", mirage_viper_stats, mirage_viper_gear, mirage_viper_loot_table, difficulty=150, description=mirage_viper_description, floor_range=mirage_viper_floor_range, spells=mirage_viper_spells, spell_probabilities=mirage_viper_spell_probabilities, initial_stats=mirage_viper_initial_stats)
+mirage_viper = Monster("Mirage Viper", mirage_viper_stats, mirage_viper_gear, mirage_viper_loot_table, difficulty=3, description=mirage_viper_description, floor_range=mirage_viper_floor_range, spells=mirage_viper_spells, spell_probabilities=mirage_viper_spell_probabilities, initial_stats=mirage_viper_initial_stats)
 
 dune_scorpion_stats = {
     "HP": 300,
@@ -82,7 +60,7 @@ dune_scorpion_stats = {
 dune_scorpion_gear = ["Venomous Stinger", "Carapace Armor"]
 dune_scorpion_loot_table = ["Gold", "Scorpion Tail", "Shadowstone"]
 dune_scorpion_description = "Dune Scorpions are formidable arachnids that roam the desert sands in search of prey. Their venomous stingers can inject potent neurotoxins, paralyzing their victims and leaving them at the mercy of these deadly predators."
-dune_scorpion_floor_range = (100, 200)
+dune_scorpion_floor_range = (2, 5)
 dune_scorpion_spells = []
 dune_scorpion_spell_probabilities = {}
 dune_scorpion_initial_stats = dune_scorpion_stats.copy()
@@ -104,7 +82,7 @@ sunfire_djinn_stats = {
 sunfire_djinn_gear = ["Blazing Scimitar", "Inferno Robes"]
 sunfire_djinn_loot_table = ["Gold", "Djinn Essence", "Burning Ember"]
 sunfire_djinn_description = "Sunfire Djinns are fiery spirits bound to the scorching deserts, wielding the power of the sun itself. They can conjure flames to incinerate their foes and unleash searing blasts of heat. Only the bravest adventurers dare to challenge their fiery wrath."
-sunfire_djinn_floor_range = (200, 300)
+sunfire_djinn_floor_range = (2, 5)
 sunfire_djinn_spells = []
 sunfire_djinn_spell_probabilities = {}
 sunfire_djinn_initial_stats = sunfire_djinn_stats.copy()
@@ -148,7 +126,7 @@ sandstorm_elemental_stats = {
 sandstorm_elemental_gear = ["Whirling Sands", "Tempest Veil"]
 sandstorm_elemental_loot_table = ["Gold", "Elemental Essence", "Sands of Time"]
 sandstorm_elemental_description = "Sandstorm Elementals are embodiments of the desert's relentless fury, manifesting as swirling tornadoes of sand and wind. They can whip up devastating sandstorms to engulf their foes, tearing flesh from bone with the force of their gales."
-sandstorm_elemental_floor_range = (200, 300)
+sandstorm_elemental_floor_range = (2, 5)
 sandstorm_elemental_spells = []
 sandstorm_elemental_spell_probabilities = {}
 sandstorm_elemental_initial_stats = sandstorm_elemental_stats.copy()
@@ -170,7 +148,7 @@ cactus_behemoth_stats = {
 cactus_behemoth_gear = ["Thorny Spikes", "Prickly Armor"]
 cactus_behemoth_loot_table = ["Gold", "Cactus Needle", "Essence of Thorns"]
 cactus_behemoth_description = "Cactus Behemoths are colossal plant-like creatures that roam the arid deserts, resembling towering cacti. Their thick, spiny armor protects them from harm, and they can impale their enemies with razor-sharp thorns. Beware their wrath, for their rage is as fierce as the desert sun."
-cactus_behemoth_floor_range = (300, 400)
+cactus_behemoth_floor_range = (2, 5)
 cactus_behemoth_spells = []
 cactus_behemoth_spell_probabilities = {}
 cactus_behemoth_initial_stats = cactus_behemoth_stats.copy()
@@ -258,7 +236,7 @@ sand_golem_stats = {
 sand_golem_gear = ["Granite Fists", "Sandstone Armor"]
 sand_golem_loot_table = ["Gold", "Golem Shard", "Desert Relic"]
 sand_golem_description = "Sand Golems are towering constructs crafted from the sands of the desert. Animated by ancient magic, they lumber through the dunes, crushing anything in their path with their massive fists. Only the strongest adventurers dare to challenge these behemoths."
-sand_golem_floor_range = (300, 400)
+sand_golem_floor_range = (1, 5)
 sand_golem_spells = []
 sand_golem_spell_probabilities = {}
 sand_golem_initial_stats = sand_golem_stats.copy()
@@ -851,4 +829,6 @@ fire_elemental_spells = ["Fireball", "Flame Burst"]
 fire_elemental_spell_probabilities = {"Fireball": 0.6, "Flame Burst": 0.4} 
 fire_elemental_initial_stats = fire_elemental_stats.copy() # Make a copy of the initial stats
 fire_elemental = Monster("Fire Elemental", fire_elemental_stats, fire_elemental_gear, fire_elemental_loot_table, difficulty=20, description=fire_elemental_description, floor_range=fire_elemental_floor_range, spells=fire_elemental_spells, spell_probabilities=fire_elemental_spell_probabilities, initial_stats=fire_elemental_initial_stats)
+print("Loading monsters from desert.py...")
 
+# Define your monsters here...

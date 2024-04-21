@@ -33,9 +33,6 @@ def import_monsters_from_biome(game):
     
     return monsters
 
-
-
-
 class Monster:
     def __init__(self, name, stats, gear, loot_table, difficulty, description, floor_range, spells=None, spell_probabilities=None, initial_stats=None):
         self.name = name
