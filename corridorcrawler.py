@@ -508,8 +508,6 @@ def add_loot_to_inventory(player, loot):
         if item != "Gold":
             print(f"{quantity} {item}")
 
-
-
 def game_over():
     input("Press any key to quit the game...")
     exit()
@@ -656,7 +654,7 @@ def attack(player, enemy):
             player.stats['HP'] -= enemy.stats['Attack']
             if player.stats['HP'] <= 0:
                 print("You have been defeated!")
-                # Add any other game over logic here
+                game_over()
 
 def use_spell_in_combat(player, enemy):
     # Prompt the player to choose a spell
