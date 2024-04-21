@@ -13,6 +13,7 @@
     [x] Add magic usage for the player in combat
     [ ] Add item usage for the player in combat
     [ ] Add the option to equip/unequip gear at the cost of 1 turn
+    [x] Add the loot/drop item system when defeating enemies
 
 ### Upgrade the corridor generator :
     [ ] Look into having multiples floor with a "floor boss" at the end of each floor. 
@@ -26,7 +27,7 @@
     [ ] Add achievements to unlock new things : Races and Classes
 
 ### Create gold system :
-    [ ] Add gold loot from enemies
+    [x] Add gold loot from enemies
     [ ] Add the Merchant Event for the room events
     [ ] Define the current items sold by the merchant by the stage of the game
     [ ] Create specials merchants ?

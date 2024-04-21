@@ -109,21 +109,6 @@ class Player:
         self.max_hp = self.calculate_hp()
         self.max_mp = self.calculate_mp()
 
-    def add_to_inventory(self, item, quantity=1):
-        if isinstance(item, str):  # If item is a string, create an item object
-            item_object = Item(item)  # Assuming Item is the class for representing items
-            for _ in range(quantity):
-                self.inventory.append(item_object)
-                #print("Added item to inventory:", item)  # Debug print
-        else:  # If item is already an object, ensure it has a name attribute
-            if hasattr(item, 'name'):
-                for _ in range(quantity):
-                    self.inventory.append(item)
-                    #print("Added item to inventory:", item.name)  # Debug print
-            else:
-                print("Error: Item object must have a 'name' attribute.")
-
-
     def learn_spell(self, spell):
         self.spells.append(spell)
 
