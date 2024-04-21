@@ -129,7 +129,7 @@ arcane_scholar_stats = {
 }
 
 arcane_scholar_gear = ["Tome of Arcana", "Scholar's Robes"]
-arcane_scholar_loot_table = ["Arcane Codex", "Mystic Scroll", "Scholar's Quill"]
+arcane_scholar_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 arcane_scholar_description = "The Arcane Scholar is a seeker of knowledge, delving into ancient tomes and scrolls to uncover the mysteries of the arcane. With a mind as sharp as any blade, it wields powerful spells with precision and expertise."
 arcane_scholar_floor_range = (1,5)
 arcane_scholar_spells = ["Arcane Bolt", "Knowledge Drain"]

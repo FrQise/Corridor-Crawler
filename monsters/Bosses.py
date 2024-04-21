@@ -21,7 +21,6 @@ edouard_description = "Edouard is a strange young half-elf wearing a fierce butt
 edouard_floor_range = (10,20)
 edouard = Monster("Edouard", edouard_stats, edouard_gear, edouard_loot_table, difficulty=1, description=edouard_description, floor_range=edouard_floor_range)
 
-
 torgorak_stats = {
     "HP": 200,
     "Damage" : 50, #Define damage attribute

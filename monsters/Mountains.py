@@ -36,7 +36,7 @@ cockatrice_stats = {
     "Element": "None"  # Define elemental attribute of the Cockatrice's attack
 }
 cockatrice_gear = ["Razor Beak", "Stone Scales"]
-cockatrice_loot_table = ["Gold", "Cockatrice Feather", "Petrified Eye"]
+cockatrice_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 cockatrice_description = "Cockatrices are fearsome creatures with the body of a bird and the tail of a serpent. They are known for their petrifying gaze, capable of turning their victims to stone with a single glance. Their razor-sharp beaks and stone scales make them dangerous adversaries, striking fear into the hearts of travelers."
 cockatrice_floor_range = (1,5)
 cockatrice_spells = []

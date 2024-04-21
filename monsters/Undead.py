@@ -14,7 +14,7 @@ skeleton_stats = {
     "Element": "None"  # Define elemental attribute of the Skeleton's attack
 }
 skeleton_gear = ["Rusty Sword", "Broken Shield", "Tattered Armor"]
-skeleton_loot_table = ["Gold", "Bone", "Skeleton Key"]
+skeleton_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 skeleton_description = "Skeletons are undead warriors risen from the grave. Despite their lack of flesh, they are strong and resilient fighters, wielding weapons with deadly precision. Their hollow eyes gleam with malice as they seek to vanquish the living."
 skeleton_floor_range = (1,5)
 skeleton_spells = []

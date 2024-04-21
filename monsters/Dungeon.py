@@ -14,7 +14,7 @@ goblin_stats = {
     "Element": "Fire"  # Define elemental attribute of the goblin's attack
 }
 goblin_gear = ["Rusty Sword", "Tattered Cloth Armor"]
-goblin_loot_table = ["Gold", "Health Potion", "Small Gem"]
+goblin_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 goblin_description = "Goblins are small, agile creatures known for their mischief and love of shiny objects. Despite their size, they can be formidable opponents in combat, relying on their speed and cunning to outmaneuver their foes."
 goblin_floor_range = (1,2)
 goblin_spells = ["Smelly feet"]

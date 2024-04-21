@@ -5,7 +5,7 @@ import importlib
 import sys
 import pickle
 import os
-from item_definitions import Weapon, Armor, weapons, armor
+from item_definitions import Weapon, Armor, BasicItem, weapons, armor, basic_items
 from races_classes import Race, Class, human, elf, dwarf, goblin, fighter, wizard, rogue, cleric, sorcerer
 from itertools import zip_longest
 from pantheon import gods
@@ -99,6 +99,7 @@ class Player:
         ### START PLAYER COUNTER ###
 
         self.killed_enemies_count = 0
+        self.gold = 0
 
         ### END PLAYER COUNTER ###
 
@@ -107,6 +108,21 @@ class Player:
         self.stats["MP"] = self.calculate_mp()
         self.max_hp = self.calculate_hp()
         self.max_mp = self.calculate_mp()
+
+    def add_to_inventory(self, item, quantity=1):
+        if isinstance(item, str):  # If item is a string, create an item object
+            item_object = Item(item)  # Assuming Item is the class for representing items
+            for _ in range(quantity):
+                self.inventory.append(item_object)
+                #print("Added item to inventory:", item)  # Debug print
+        else:  # If item is already an object, ensure it has a name attribute
+            if hasattr(item, 'name'):
+                for _ in range(quantity):
+                    self.inventory.append(item)
+                    #print("Added item to inventory:", item.name)  # Debug print
+            else:
+                print("Error: Item object must have a 'name' attribute.")
+
 
     def learn_spell(self, spell):
         self.spells.append(spell)
@@ -296,12 +312,14 @@ def check_inventory(game, player):
         if spell.name == "Healing Light" or "Flame Burst" or "Weakness Curse":
             player.learn_spell(spell)
     print("\nPlayer Inventory:")
+    # print("Player Inventory:", player.inventory) # Debug print
     for i, item in enumerate(player.inventory):
         print(f"{i + 1}. {item.name}")
+    print("\n")
 
     questions = [
         inquirer.List("inventory_action",
-                      message="[?] Inventory Options:",
+                      message="[?] Inventory Options",
                       choices=["Equip Item", "Use Item", "View Details", "Back"])
     ]
     answer = inquirer.prompt(questions)["inventory_action"]
@@ -482,6 +500,30 @@ def verify_stats(player):
         player.max_hp = new_max_hp  # Update max_hp
         player.stats["HP"] += hp_difference  # Update HP with the difference in max_hp
 
+def add_loot_to_inventory(player, loot):
+    for item_name, quantity in loot.items():
+        if item_name != "Gold":
+            for _ in range(quantity):
+                # Find the corresponding item object from the predefined weapons and armor lists
+                found_item = None
+                for item in weapons + armor:
+                    if item.name == item_name:
+                        found_item = item
+                        break
+                # If the item is found, add its name to the player's inventory
+                if found_item is not None:
+                    player.inventory.append(found_item.name)
+                    # print("Adding item to inventory:", found_item.name)  # Debug print
+                else:
+                    print(f"Error: Item '{item_name}' not found in predefined items.")
+
+    # Print loot obtained
+    print("You got:")
+    for item, quantity in loot.items():
+        if item != "Gold":
+            print(f"{quantity} {item}")
+
+
 
 def game_over():
     input("Press any key to quit the game...")
@@ -566,6 +608,27 @@ def handle_enemy_encounter(game, player, current_difficulty):
             print(f"\n\033[1m{enemy.name} has been defeated!\033[0m\n")
             player.killed_enemies_count += 1
             game.event_resolved = True  # Set the flag to indicate that the event has been resolved
+            # Generate loot
+            loot = enemy.generate_loot()
+            # Add gold to player's inventory
+            if "Gold" in loot:
+                player.gold += loot["Gold"]
+                #print("Added gold to inventory:", loot["Gold"])  # Debug print
+            for item, quantity in loot.items():
+                if item != "Gold":
+                    item_object = next((obj for obj in weapons + armor + basic_items if obj.name == item), None)
+                    if item_object:
+                        for _ in range(quantity):
+                            player.inventory.append(item_object)  # Add the item object itself
+                            #print("Adding item to inventory:", item)  # Debug print
+            # Print loot obtained
+            print("You got:")
+            for item, quantity in loot.items():
+                if item == "Gold":
+                    print(f"{quantity} Gold")
+                else:
+                    print(f"{quantity} {item}")
+
             break  # Exit the combat loop if the enemy is defeated
 
         # Check if the player is defeated after taking action
@@ -996,6 +1059,7 @@ class Game:
             print(current_event.description)
             print("Current position :", self.current_position)
             print("Current floor", self.current_difficulty)
+            print("Gold :", self.player.gold)
             check_room(self.player)
             # Player options
             questions = [

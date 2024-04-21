@@ -14,7 +14,7 @@ werewolf_stats = {
     "Element": "None"  # Define elemental attribute of the Werewolf's attack
 }
 werewolf_gear = ["Razor-sharp Claws", "Fur Coat"]
-werewolf_loot_table = ["Gold", "Werewolf Fang", "Moonstone"]
+werewolf_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 werewolf_description = "Werewolves are fearsome creatures cursed with lycanthropy, transforming into savage beasts under the light of the full moon. In their wolf form, they possess incredible strength and agility, tearing through their enemies with razor-sharp claws and fangs. Despite their ferocity, some retain a semblance of their human consciousness, tormented by the atrocities they commit while in their bestial state."
 werewolf_floor_range = (1,5)
 werewolf_spells = []

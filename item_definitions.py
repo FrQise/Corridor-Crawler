@@ -27,6 +27,10 @@ class Armor(Item):
         self.slot = slot
         self.stats = stats if stats is not None else {}
 
+class BasicItem(Item):
+    def __init__(self, name, description):
+        super().__init__(name, description)
+
 class WeaponCategory:
     def __init__(self, name):
         self.name = name
@@ -64,6 +68,12 @@ medium_armor = ArmorCategory("Medium")
 heavy_armor = ArmorCategory("Heavy")
 shield_armor = ArmorCategory("Shield")
 # Add more armor categories as needed...
+
+# Define items
+basic_items = [
+    BasicItem("Gold", "It's money")
+]
+
 
 # Define weapons
 weapons = [

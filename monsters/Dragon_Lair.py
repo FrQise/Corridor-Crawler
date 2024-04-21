@@ -36,7 +36,7 @@ kobold_warrior_stats = {
     "Element": "None"
 }
 kobold_warrior_gear = ["Rusty Sword", "Leather Armor"]
-kobold_warrior_loot_table = ["Gold", "Kobold Scale", "Broken Weapon"]
+kobold_warrior_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 kobold_warrior_description = "Kobold Warriors are fierce and agile fighters, wielding rusty swords and wearing patchy leather armor. They fiercely defend their lairs with cunning tactics and ferocious determination."
 kobold_warrior_floor_range = (1,5)
 kobold_warrior_spells = []

@@ -925,7 +925,7 @@ earth_elemental_stats = {
     "Element": "Earth"  # Define elemental attribute of the Earth Elemental's attack
 }
 earth_elemental_gear = ["Rocky Form", "Earthen Armor"]
-earth_elemental_loot_table = ["Gold", "Earth Essence", "Crystal Shard"]
+earth_elemental_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 earth_elemental_description = "Earth Elementals are beings of solid stone and earth, animated by ancient magic. They wield the power of the earth itself, crushing their enemies beneath massive boulders and summoning earthquakes to shake the ground. Their sturdy form makes them nearly impervious to physical harm."
 earth_elemental_floor_range = (1,5)
 earth_elemental_spells = ["Stone Barrage", "Quake"]

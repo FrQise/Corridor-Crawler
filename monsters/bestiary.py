@@ -1,6 +1,7 @@
 from spells import Spell
 import importlib.util
 from os.path import dirname, basename, isfile, join
+import random
 
 def import_monsters_from_biome(game):
     monsters = []
@@ -41,11 +42,20 @@ class Monster:
         self.stats = stats
         self.initial_stats = stats.copy()
         self.gear = gear
-        self.loot_table = loot_table
+        self.loot_table = loot_table if loot_table is not None else {}
         self.difficulty = difficulty
         self.floor_range = floor_range
         self.description = description
-        self.initial_hp = stats["HP"] #Initialize initial HP attribute
+        self.initial_hp = stats["HP"]
         self.initial_stats = initial_stats
-        self.spells = spells if spells else [] # List of spells the monster can use
-        self.spell_probabilities = spell_probabilities if spell_probabilities else {}  # Probability for each spell
+        self.spells = spells if spells else []
+        self.spell_probabilities = spell_probabilities if spell_probabilities else {}
+
+    def generate_loot(self):
+        loot = {}
+        for item, loot_info in self.loot_table.items():
+            chance_to_loot, quantity = loot_info
+            if random.random() < chance_to_loot or chance_to_loot == 1:
+                loot[item] = quantity
+                # print("Generated loot:", item, "Quantity:", quantity)  # Debug print
+        return loot
