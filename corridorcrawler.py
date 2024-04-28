@@ -31,7 +31,7 @@ class CorridorDungeon:
         self.corridor = []
 
     def generate_corridor(self):
-        self.corridor.append(CorridorEvent("Starting Room - Welcome to the Dungeon!"))
+        self.corridor.append(CorridorEvent("Starting Room"))
         for _ in range(self.corridor_length - 1):
             event = self.generate_event()
             self.corridor.append(event)
@@ -204,7 +204,7 @@ def check_room(player):
     print(f"Race: {player.race.name} | Class: {player.char_class.name}\n")
     print(f"\033[91mHP: {player.stats['HP']}\033[0m")  # Red color for HP
     print(f"\033[94mMP: {player.stats['MP']}\033[0m\n")  # Blue color for MP
-    print(player.active_buffs)
+    #print(player.active_buffs)
     print(f"Holding: {player.get_current_weapon().name if player.get_current_weapon() else 'None'}")
 
 def check_stats(game, player):
@@ -491,7 +491,7 @@ def add_loot_to_inventory(player, loot):
             for _ in range(quantity):
                 # Find the corresponding item object from the predefined weapons and armor lists
                 found_item = None
-                for item in weapons + armor:
+                for item in weapons + armor + basic_items:
                     if item.name == item_name:
                         found_item = item
                         break
@@ -852,7 +852,6 @@ def apply_spell_buff(game, player, spell):
     else:
         print("\nThis spell does not provide any buff.")
         wait_for_input()
-
 
 def use_items(player):
     # Implement item usage logic here
