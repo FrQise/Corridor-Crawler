@@ -631,7 +631,7 @@ def attack(player, enemy):
     
     if equipped_weapon:
         # Calculate player's attack power based on strength and weapon's attack
-        attack_power = player.stats['Strength'] + equipped_weapon.stats.get('Attack', 0)
+        attack_power = player.stats['Strength'] + equipped_weapon.stats.get('Attack', lambda: 0)()
         
         # Calculate damage dealt by subtracting enemy's defense from player's attack power
         damage = max(0, attack_power - enemy.stats.get('Defense', 0))
@@ -862,8 +862,7 @@ def block(player, enemy):
     damage_reduction = player.stats.get('Defense', 0)
     # Reduce the enemy's damage by the player's defense
     enemy_damage = max(0, enemy.stats.get('Damage', 0) - damage_reduction)
-    # Reduce player's HP by the enemy's damage
-    player.stats['HP'] -= enemy_damage
+    # Print the blocked damage
     print(f"You blocked the {enemy.name}'s attack and received {enemy_damage} damage!")
 
 def reset_enemy_stats(enemy):
@@ -873,25 +872,38 @@ def reset_enemy_stats(enemy):
 
 def enemy_action(player, enemy):
     # Check if the enemy can cast spells and has spells to cast
+    #print(f"{enemy.name} is deciding on its action...")   #DEBUG PRINT
     if hasattr(enemy, 'spells') and enemy.spells:
-        # Check if the enemy decides to cast a spell based on its spell probabilities
+        #print(f"{enemy.name} has spells to cast.")
+        # Check if the enemy decides to cast a spell based on its spell probabilities    #DEBUG PRINT
         for spell in enemy.spells:
             probability = enemy.spell_probabilities.get(spell, 0)  # Get the probability of casting the spell
+            #print(f"Probability of casting {spell}: {probability}")  #DEBUG PRINT
             if random.random() < probability:  # Roll a random number and check if it's less than the probability
+                print(f"{enemy.name} decides to cast {spell}!")
                 # Find the spell object by its name
                 for spell_obj in all_spells:
                     if spell_obj.name == spell:
-                        spell_damage = spell_obj.damage
+                        if callable(spell_obj.damage_func):  # Check if damage is a function
+                            spell_damage = spell_obj.damage_func()  # Calculate the damage if it's a function
+                        else:
+                            spell_damage = spell_obj.damage_func
                         # Apply the spell's damage to the player
                         apply_enemy_spell_damage(player, spell_damage, spell_obj.damage_type)
-                        print(f"{enemy.name} casts {spell} and deals {spell_damage} {spell_obj.damage_type} damage!")
+                        print(f"{enemy.name} uses {spell} and deals {spell_damage} {spell_obj.damage_type} damage!")
                         return  # Exit the function after casting the spell
 
     # If the enemy doesn't cast a spell, perform a regular attack
+    print(f"{enemy.name} decides to perform a regular attack.")
     if hasattr(enemy, 'stats') and 'Damage' in enemy.stats:
         damage_stat = enemy.stats['Damage']
+        #print(f"{enemy.name}'s Damage stat: {damage_stat}")  #DEBUG PRINT
         damage_modifier = random.uniform(0.8, 1.2)  # Random modifier between 80% to 120%
+        #print(f"Damage modifier: {damage_modifier}")   #DEBUG PRINT
         damage_dealt = int(damage_stat * damage_modifier)  # Calculate the damage dealt
+        #print(f"{enemy.name} deals {damage_dealt} damage before any reductions.")   #DEBUG PRINT
+        print(f"{enemy.name} attacks and deals {damage_dealt} damage!")
+
         
         # Check if the enemy's attack is elemental
         if 'Element' in enemy.stats:
@@ -934,18 +946,18 @@ class Game:
         self.current_difficulty = 1 # Initialize the current difficulty level
         self.event_resolved = False # Flag to track wheteher the current event has been resolved
         self.biomes = [
-            Biome("Forest", "A dense forest with towering trees and lush vegetation."),
-            Biome("Cave", "A dark and mysterious underground cavern."),
-            Biome("Desert", "A vast expanse of sand dunes and scorching heat."),
-            Biome("Castle", "The corridor took the look of an old Castle, what may lurk inside those rock walls"),
-            Biome("Dragon Lair", "The corridor feel like a Dragon Lair"),
+            #Biome("Forest", "A dense forest with towering trees and lush vegetation."),
+            #Biome("Cave", "A dark and mysterious underground cavern."),
+            #Biome("Desert", "A vast expanse of sand dunes and scorching heat."),
+            #Biome("Castle", "The corridor took the look of an old Castle, what may lurk inside those rock walls"),
+            #Biome("Dragon Lair", "The corridor feel like a Dragon Lair"),
             Biome("Dungeon", "The base corridor"),
-            Biome("Hell", "Brrrr Hell"),
-            Biome("Mage Tower", "A tower, with mages"),
-            Biome("Mountains", "M o u n t a i n s"),
-            Biome("Mushroom", "Fungaloid land"),
-            Biome("Swamp", "Schni schna schnappi"),
-            Biome("Undead", "It's ALIVE, ALIVE"),
+            #Biome("Hell", "Brrrr Hell"),
+            #Biome("Mage Tower", "A tower, with mages"),
+            #Biome("Mountains", "M o u n t a i n s"),
+            #Biome("Mushroom", "Fungaloid land"),
+            #Biome("Swamp", "Schni schna schnappi"),
+            #Biome("Undead", "It's ALIVE, ALIVE"),
             # Add more biomes as needed
         ]
         self.current_biome = None # Initialize current biome 

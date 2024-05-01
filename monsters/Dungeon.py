@@ -2,23 +2,23 @@ from monsters.bestiary import Monster
 
 dire_rat_stats = {
     "HP": 80,  # Define HP attribute for Dire Rat
-    "Damage": 25,  # Define damage attribute for Dire Rat
+    "Damage": 5,  # Define damage attribute for Dire Rat
     "Defense": 15,  # Define Defense stat vs attack stat
     "Magic Defense": 0,  # Define magic defense vs spells
-    "Strength": 14,
-    "Dexterity": 18,
-    "Constitution": 16,
-    "Intelligence": 6,
+    "Strength": 10,
+    "Dexterity": 15,
+    "Constitution": 12,
+    "Intelligence": 2,
     "Wisdom": 10,
-    "Charisma": 6,
+    "Charisma": 4,
     "Element": "None"  # Define elemental attribute of the Dire Rat's attack
 }
 dire_rat_gear = ["Razor-sharp Teeth", "Fur"]
 dire_rat_loot_table = {"Gold":(1, 10)}
 dire_rat_description = "Dire Rats are larger and more aggressive cousins of common rats, infesting dungeons and sewers with their filthy presence. They swarm their prey with overwhelming numbers, their sharp teeth and claws tearing through flesh with ease. Despite their small size, they are tenacious predators, capable of delivering deadly bites."
 dire_rat_floor_range = (1, 2)
-dire_rat_spells = []
-dire_rat_spell_probabilities = {}
+dire_rat_spells = ["Bite", "Filthy Claw"]
+dire_rat_spell_probabilities = {"Bite": 0.7, "Filthy Claw": 0.3} 
 dire_rat_initial_stats = dire_rat_stats.copy() # Make a copy of the initial stats
 dire_rat = Monster("Dire Rat", dire_rat_stats, dire_rat_gear, dire_rat_loot_table, difficulty=1, description=dire_rat_description, floor_range=dire_rat_floor_range, spells=dire_rat_spells, spell_probabilities=dire_rat_spell_probabilities, initial_stats=dire_rat_initial_stats)
 
@@ -38,7 +38,7 @@ goblin_stats = {
 goblin_gear = ["Rusty Sword", "Tattered Cloth Armor"]
 goblin_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 goblin_description = "Goblins are small, agile creatures known for their mischief and love of shiny objects. Despite their size, they can be formidable opponents in combat, relying on their speed and cunning to outmaneuver their foes."
-goblin_floor_range = (1, 2)
+goblin_floor_range = (2, 2)
 goblin_spells = ["Smelly feet"]
 goblin_spell_probabilities = {goblin_spells[0]: 1} 
 goblin_initial_stats = goblin_stats.copy() #Make a copy of the initial stats
@@ -60,7 +60,7 @@ human_thug_stats = {
 human_thug_gear = ["Bludgeon", "Leather Vest"]
 human_thug_loot_table = {"Gold":(1, 10)}
 human_thug_description = "Human Thugs are rough and violent individuals who make a living through intimidation, theft, and extortion. Armed with crude weapons and a lack of scruples, they roam the streets looking for easy marks to prey upon."
-human_thug_floor_range = (1, 3)
+human_thug_floor_range = (2, 3)
 human_thug_spells = []
 human_thug_spell_probabilities = {}
 human_thug_initial_stats = human_thug_stats.copy()
