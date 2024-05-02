@@ -89,7 +89,7 @@ basic_items = [
 
 # Define weapons
 weapons = [
-    Weapon("Longsword", "A versatile weapon with reach and slicing power", slashing, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1,10)}, printed_attack="2d10"),
+    Weapon("Longsword", "A versatile weapon with reach and slicing power", slashing, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1,10)}, printed_attack="1d10"),
     Weapon("Warhammer", "A heavy hammer for smashing through armor", bludgeoning, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1,10), "Strength": 1}, printed_attack="1d10"),
     Weapon("Short Sword", "A short and basic sword", slashing, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1, 8) + 1}, printed_attack="1d8+1"),
     Armor("Basic Shield", "A basic shield", shield_armor, "Left Hand", stats={"Defense": 3}),
