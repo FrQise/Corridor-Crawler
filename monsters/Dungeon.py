@@ -1,7 +1,8 @@
 from monsters.bestiary import Monster
+import random
 
 dire_rat_stats = {
-    "HP": 80,  # Define HP attribute for Dire Rat
+    "HP": 30,  # Define HP attribute for Dire Rat
     "Damage": 5,  # Define damage attribute for Dire Rat
     "Defense": 15,  # Define Defense stat vs attack stat
     "Magic Defense": 0,  # Define magic defense vs spells
@@ -11,7 +12,7 @@ dire_rat_stats = {
     "Intelligence": 2,
     "Wisdom": 10,
     "Charisma": 4,
-    "Element": "None"  # Define elemental attribute of the Dire Rat's attack
+    "Element": "Slashing"  # Define elemental attribute of the Dire Rat's attack
 }
 dire_rat_gear = ["Razor-sharp Teeth", "Fur"]
 dire_rat_loot_table = {"Gold":(1, 10)}
@@ -23,23 +24,23 @@ dire_rat_initial_stats = dire_rat_stats.copy() # Make a copy of the initial stat
 dire_rat = Monster("Dire Rat", dire_rat_stats, dire_rat_gear, dire_rat_loot_table, difficulty=1, description=dire_rat_description, floor_range=dire_rat_floor_range, spells=dire_rat_spells, spell_probabilities=dire_rat_spell_probabilities, initial_stats=dire_rat_initial_stats)
 
 goblin_stats = {
-    "HP": 50,  # Define HP attribute for Goblin
-    "Damage": 20,  # Define damage attribute for Goblin
+    "HP": 26,  # Define HP attribute for Goblin
+    "Damage": 5,  # Define damage attribute for Goblin
     "Defense": 10,  # Define Defense stat vs attack stat
     "Magic Defense": 0,  # Define magic defense vs spells
     "Strength": 8,
-    "Dexterity": 12,
-    "Constitution": 10,
-    "Intelligence": 6,
-    "Wisdom": 6,
-    "Charisma": 6,
-    "Element": "Fire"  # Define elemental attribute of the goblin's attack
+    "Dexterity": 14,
+    "Constitution": 12,
+    "Intelligence": 10,
+    "Wisdom": 8,
+    "Charisma": 8,
+    "Element": "Slashing"  # Define elemental attribute of the goblin's attack
 }
 goblin_gear = ["Rusty Sword", "Tattered Cloth Armor"]
 goblin_loot_table = {"Gold":(1, 10), "Longsword":(1,1)}
 goblin_description = "Goblins are small, agile creatures known for their mischief and love of shiny objects. Despite their size, they can be formidable opponents in combat, relying on their speed and cunning to outmaneuver their foes."
-goblin_floor_range = (2, 2)
-goblin_spells = ["Smelly feet"]
+goblin_floor_range = (1, 2)
+goblin_spells = ["Vicious Shank", "Cunning Sling"]
 goblin_spell_probabilities = {goblin_spells[0]: 1} 
 goblin_initial_stats = goblin_stats.copy() #Make a copy of the initial stats
 goblin = Monster("Goblin", goblin_stats, goblin_gear, goblin_loot_table, difficulty=1, description=goblin_description, floor_range=goblin_floor_range, spells=goblin_spells, spell_probabilities=goblin_spell_probabilities, initial_stats=goblin_initial_stats)

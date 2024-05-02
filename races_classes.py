@@ -51,18 +51,18 @@ class Class:
         return spell.category in self.spell_categories
 
 # Define classes
-fighter = Class("Fighter", "Masters of martial combat", stats={"Strength": 13, "Constitution": 12},
+fighter = Class("Fighter", "Masters of martial combat", stats={"Strength": 13, "Dexterity": 12,"Constitution": 12,"Intelligence": 10,"Wisdom": 11,"Charisma": 10},
                  weapon_proficiencies=["One-Handed Sword", "Axe"], armor_proficiencies=["Light Armor", "Medium Armor", "Heavy Armor", "Left Hand"], spell_categories=[])
 
-wizard = Class("Wizard", "Masters of arcane magic", stats={"Intelligence": 3, "Wisdom": 2},
+wizard = Class("Wizard", "Masters of arcane magic", stats={"Strength": 10, "Dexterity": 12, "Constitution": 10, "Intelligence": 13, "Wisdom": 12,"Charisma": 11},
                spell_categories=["Evocation", "Invocation", "Divination"], weapon_proficiencies=["Staff"], armor_proficiencies=["Light Armor"])
 
-rogue = Class("Rogue", "Stealthy and skilled in deception", stats={"Dexterity": 3, "Charisma": 2},
+rogue = Class("Rogue", "Stealthy and skilled in deception", stats={"Strenght": 10, "Dexterity": 13, "Consitution": 10, "Intelligence": 11, "Wisdom" : 12, "Charisma": 12},
               weapon_proficiencies=["Dagger", "Shortbow"], armor_proficiencies=["Light Armor"], spell_categories=[])
 
-cleric = Class("Cleric", "Divine agents serving a higher power", stats={"Wisdom": 4, "Charisma": 1},
+cleric = Class("Cleric", "Divine agents serving a higher power", stats={"Strength" : 12, "Dexterity" : 10, "Constitution" : 11, "Intelligence" : 10, "Wisdom": 14, "Charisma": 12},
                spell_categories=["Evocation", "Invocation", "Divination", "Necromancy"], weapon_proficiencies=["Mace", "Warhammer"],
                armor_proficiencies=["Medium Armor", "Shield"])
 
-sorcerer = Class("Sorcerer", "Innate spellcasters wielding raw magical power", stats={"Charisma": 4, "Constitution": 1},
+sorcerer = Class("Sorcerer", "Innate spellcasters wielding raw magical power", stats={"Strength" : 10, "Dexterity" : 12, "Constitution" : 11, "Intelligence" : 12, "Wisdom": 14, "Charisma": 12},
                  spell_categories=["Evocation", "Invocation", "Enchantment"], weapon_proficiencies=["Dagger"], armor_proficiencies=["Robe"])

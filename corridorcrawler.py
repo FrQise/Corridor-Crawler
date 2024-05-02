@@ -128,12 +128,12 @@ class Player:
 
     def apply_race_modifiers(self):
         if self.race:
-            self.stats['Strength'] += self.race.strength
-            self.stats['Dexterity'] += self.race.dexterity
-            self.stats['Constitution'] += self.race.constitution
-            self.stats['Intelligence'] += self.race.intelligence
-            self.stats['Wisdom'] += self.race.wisdom
-            self.stats['Charisma'] += self.race.charisma
+            self.stats['Strength'] = self.race.strength
+            self.stats['Dexterity'] = self.race.dexterity
+            self.stats['Constitution'] = self.race.constitution
+            self.stats['Intelligence'] = self.race.intelligence
+            self.stats['Wisdom'] = self.race.wisdom
+            self.stats['Charisma'] = self.race.charisma
 
             # Apply elemental resistance modifiers based on race if they exist
             if hasattr(self.race, 'fire_resistance'):
@@ -285,7 +285,10 @@ def view_equipment_details(player):
                 print(f"Description: {item.description}")
                 print("Modifiers:")
                 for stat, value in item.stats.items():
-                    print(f"{stat}: {value}")
+                    if stat != "Attack":  # Exclude printing the "Attack" stat
+                        print(f"{stat}: {value}")
+                if "Attack" in item.stats and callable(item.stats["Attack"]):
+                    print(f"Attack Formula: {item.get_attack_formula()}")
                 wait_for_input()
                 return
 

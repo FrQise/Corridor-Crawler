@@ -12,15 +12,25 @@ class DamageType:
 class ElementalProperty:
     def __init__(self, name):
         self.name = name
-
 class Weapon(Item):
-    def __init__(self, name, description, damage_type, category, slot, elemental_property=None, stats=None):
+    def __init__(self, name, description, damage_type, category, slot, elemental_property=None, stats=None, printed_attack=None):
         super().__init__(name, description)
         self.damage_type = damage_type
         self.category = category
         self.slot = slot
         self.elemental_property = elemental_property
         self.stats = stats if stats is not None else {}
+        self.printed_attack = printed_attack
+
+    def __str__(self):
+        stats_str = ", ".join(f"{key}: {value}" for key, value in self.stats.items() if key != "Attack")
+        if self.printed_attack:
+            return f"{self.name} - {self.description}\nStats: {stats_str}\nAttack: {self.printed_attack}"
+        else:
+            return f"{self.name} - {self.description}\nStats: {stats_str}"
+
+    def get_attack_formula(self):
+        return self.printed_attack if self.printed_attack else "Unknown"
 
 class Armor(Item):
     def __init__(self, name, description, category, slot, stats=None):
@@ -79,10 +89,9 @@ basic_items = [
 
 # Define weapons
 weapons = [
-    Weapon("Longsword", "A versatile weapon with reach and slicing power", slashing, one_handed_sword, "Right Hand", stats={"Attack": 5, "Strength": 2}),
-    Weapon("Warhammer", "A heavy hammer for smashing through armor", bludgeoning, one_handed_sword, "Right Hand"),
-    Weapon("Fire Staff", "A staff imbued with the power of fire", fire, staff, "Two-Handed", fire_elemental),
-    Weapon("Short Sword", "A short and basic sword", slashing, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1, 8) + 1}),
+    Weapon("Longsword", "A versatile weapon with reach and slicing power", slashing, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1,10)}, printed_attack="2d10"),
+    Weapon("Warhammer", "A heavy hammer for smashing through armor", bludgeoning, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1,10), "Strength": 1}, printed_attack="1d10"),
+    Weapon("Short Sword", "A short and basic sword", slashing, one_handed_sword, "Right Hand", stats={"Attack": lambda: random.randint(1, 8) + 1}, printed_attack="1d8+1"),
     Armor("Basic Shield", "A basic shield", shield_armor, "Left Hand", stats={"Defense": 3}),
     # Add more weapons...
 ]

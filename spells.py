@@ -54,8 +54,10 @@ extra_effect_spells = [
 ]
 
 monster_spells = [
-    Spell("Bite", "Crunching your feet", None, lambda: random.randint(1, 8), category="Attack", spell_type="Attack"),
-    Spell("Filthy Claw", "An unclean claw scratch your body", None, lambda: random.randint(1, 8) + 1, category="Attack", spell_type="Attack")
+    Spell("Bite", "Crunching your feet", "Piercing", lambda: random.randint(1, 8), category="Attack", spell_type="Attack"),
+    Spell("Filthy Claw", "An unclean claw scratch your body", "Slashing", lambda: random.randint(1, 8) + 1, category="Attack", spell_type="Attack"),
+    Spell("Vicious Shank", "Melee attack", "Poison", lambda: random.randint(1,6)+1, category="Attack", spell_type="Attack"),
+    Spell("Cunning Sling", "Ranged attack with a sling", "Bludgeoning", lambda: random.randint(1,8)+1, category="Attack", spell_type="Attack"),
 ]
 
 # Combine all spells into one list
